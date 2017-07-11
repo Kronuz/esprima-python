@@ -1710,7 +1710,7 @@ class Parser(object):
         elif self.match('{'):
             pattern = self.parseObjectPattern(params, kind)
         else:
-            if self.matchKeyword('let') and (kind == 'const' or kind == 'let'):
+            if self.matchKeyword('let') and (kind in ('const', 'let')):
                 self.tolerateUnexpectedToken(self.lookahead, Messages.LetInLexicalBinding)
             params.append(self.lookahead)
             pattern = self.parseVariableIdentifier(kind)
@@ -2662,21 +2662,10 @@ class Parser(object):
         value = self.lookahead.value
         typ = self.lookahead.type
         if typ is Token.Punctuator:
-            start = (
-                (value == '[') or (value == '(') or (value == '{') or
-                (value == '+') or (value == '-') or
-                (value == '!') or (value == '~') or
-                (value == '++') or (value == '--') or
-                (value == '/') or (value == '/=')  # regular expression literal
-            )
+            start = value in ('[', '(', '{', '+', '-', '!', '~', '++', '--', '/', '/=')  # regular expression literal )
 
         elif typ is Token.Keyword:
-            start = (
-                (value == 'class') or (value == 'delete') or
-                (value == 'function') or (value == 'let') or (value == 'new') or
-                (value == 'super') or (value == 'this') or (value == 'typeof') or
-                (value == 'void') or (value == 'yield')
-            )
+            start = value in ('class', 'delete', 'function', 'let', 'new', 'super', 'this', 'typeof', 'void', 'yield')
 
         return start
 

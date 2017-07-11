@@ -722,7 +722,7 @@ class Scanner(object):
         # (Annex B.1.1 on Numeric Literals)
         for i in xrange(self.index + 1, self.length):
             ch = self.source[i]
-            if ch == '8' or ch == '9':
+            if ch in '89':
                 return False
             if not Character.isOctalDigit(ch):
                 return True
@@ -744,15 +744,15 @@ class Scanner(object):
             # Octal number in ES6 starts with '0o'.
             # Binary number in ES6 starts with '0b'.
             if num == '0':
-                if ch == 'x' or ch == 'X':
+                if ch in ('x', 'X'):
                     self.index += 1
                     return self.scanHexLiteral(start)
 
-                if ch == 'b' or ch == 'B':
+                if ch in ('b', 'B'):
                     self.index += 1
                     return self.scanBinaryLiteral(start)
 
-                if ch == 'o' or ch == 'O':
+                if ch in ('o', 'O'):
                     return self.scanOctalLiteral(ch, start)
 
                 if ch and Character.isOctalDigit(ch):
@@ -774,12 +774,12 @@ class Scanner(object):
 
             ch = self.source[self.index]
 
-        if ch == 'e' or ch == 'E':
+        if ch in ('e', 'E'):
             num += self.source[self.index]
             self.index += 1
 
             ch = self.source[self.index]
-            if ch == '+' or ch == '-':
+            if ch in ('+', '-'):
                 num += self.source[self.index]
                 self.index += 1
 
