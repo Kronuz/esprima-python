@@ -425,19 +425,19 @@ class Parser(object):
 
     # Return true if the next token matches the specified punctuator.
 
-    def match(self, value):
-        return self.lookahead.type is Token.Punctuator and self.lookahead.value == value
+    def match(self, *value):
+        return self.lookahead.type is Token.Punctuator and self.lookahead.value in value
 
     # Return true if the next token matches the specified keyword
 
-    def matchKeyword(self, keyword):
-        return self.lookahead.type is Token.Keyword and self.lookahead.value == keyword
+    def matchKeyword(self, *keyword):
+        return self.lookahead.type is Token.Keyword and self.lookahead.value in keyword
 
     # Return true if the next token matches the specified contextual keyword
     # (where an identifier is sometimes a keyword depending on the context)
 
-    def matchContextualKeyword(self, keyword):
-        return self.lookahead.type is Token.Identifier and self.lookahead.value == keyword
+    def matchContextualKeyword(self, *keyword):
+        return self.lookahead.type is Token.Identifier and self.lookahead.value in keyword
 
     # Return true if the next token is an assignment operator
 
@@ -743,7 +743,7 @@ class Parser(object):
             id = token.value
             self.nextToken()
             computed = self.match('[')
-            isAsync = not self.hasLineTerminator and (id == 'async') and not self.match(':') and not self.match('(') and not self.match('*')
+            isAsync = not self.hasLineTerminator and (id == 'async') and not (self.match(':', '(', '*'))
             key = self.parseObjectPropertyKey() if isAsync else self.finalize(node, Node.Identifier(id))
         elif self.match('*'):
             self.nextToken()
@@ -1174,7 +1174,7 @@ class Parser(object):
     def parseUpdateExpression(self):
         startToken = self.lookahead
 
-        if self.match('++') or self.match('--'):
+        if self.match('++', '--'):
             node = self.startNode(startToken)
             token = self.nextToken()
             expr = self.inheritCoverGrammar(self.parseUnaryExpression)
@@ -1189,7 +1189,7 @@ class Parser(object):
         else:
             expr = self.inheritCoverGrammar(self.parseLeftHandSideExpressionAllowCall)
             if not self.hasLineTerminator and self.lookahead.type is Token.Punctuator:
-                if self.match('++') or self.match('--'):
+                if self.match('++', '--'):
                     if self.context.strict and expr.type is Syntax.Identifier and self.scanner.isRestrictedWord(expr.name):
                         self.tolerateError(Messages.StrictLHSPostfix)
                     if not self.context.isAssignmentTarget:
@@ -1211,10 +1211,9 @@ class Parser(object):
         return self.finalize(node, Node.AwaitExpression(argument))
 
     def parseUnaryExpression(self):
-
         if (
-            self.match('+') or self.match('-') or self.match('~') or self.match('!') or
-            self.matchKeyword('delete') or self.matchKeyword('void') or self.matchKeyword('typeof')
+            self.match('+', '-', '~', '!') or
+            self.matchKeyword('delete', 'void', 'typeof')
         ):
             node = self.startNode(self.lookahead)
             token = self.nextToken()
@@ -1925,7 +1924,7 @@ class Parser(object):
                 else:
                     init = self.finalize(init, Node.VariableDeclaration(declarations, 'var'))
                     self.expect(';')
-            elif self.matchKeyword('const') or self.matchKeyword('let'):
+            elif self.matchKeyword('const', 'let'):
                 init = self.createNode()
                 kind = self.nextToken().value
 
@@ -2114,7 +2113,7 @@ class Parser(object):
 
         consequent = []
         while True:
-            if self.match('}') or self.matchKeyword('default') or self.matchKeyword('case'):
+            if self.match('}') or self.matchKeyword('default', 'case'):
                 break
             consequent.append(self.parseStatementListItem())
 

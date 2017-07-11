@@ -331,9 +331,9 @@ class JSXParser(Parser):
 
     # Return True if the next JSX token matches the specified punctuator.
 
-    def matchJSX(self, value):
+    def matchJSX(self, *value):
         next = self.peekJSXToken()
-        return next.type is Token.Punctuator and next.value == value
+        return next.type is Token.Punctuator and next.value in value
 
     def parseJSXIdentifier(self):
         node = self.createJSXNode()
@@ -430,7 +430,7 @@ class JSXParser(Parser):
     def parseJSXAttributes(self):
         attributes = []
 
-        while not self.matchJSX('/') and not self.matchJSX('>'):
+        while not self.matchJSX('/', '>'):
             attribute = self.parseJSXSpreadAttribute() if self.matchJSX('{') else self.parseJSXNameValueAttribute()
             attributes.append(attribute)
 
