@@ -1551,36 +1551,39 @@ class Parser(object):
 
     # https://tc39.github.io/ecma262/#sec-block
 
+    def parseStatementListItem_Token_export(self):
+        if not self.context.isModule:
+            self.tolerateUnexpectedToken(self.lookahead, Messages.IllegalExportDeclaration)
+        return self.parseExportDeclaration()
+
+    def parseStatementListItem_Token_import(self):
+        if self.matchImportCall():
+            return self.parseExpressionStatement()
+
+        if not self.context.isModule:
+            self.tolerateUnexpectedToken(self.lookahead, Messages.IllegalImportDeclaration)
+        return self.parseImportDeclaration()
+
+    def parseStatementListItem_Token_const(self):
+        return self.parseLexicalDeclaration(Params(inFor=False))
+
+    def parseStatementListItem_Token_function(self):
+        return self.parseFunctionDeclaration()
+
+    def parseStatementListItem_Token_class(self):
+        return self.parseClassDeclaration()
+
+    def parseStatementListItem_Token_let(self):
+        return self.parseLexicalDeclaration(Params(inFor=False)) if self.isLexicalDeclaration() else self.parseStatement()
+
     def parseStatementListItem(self):
         self.context.isAssignmentTarget = True
         self.context.isBindingElement = True
         if self.lookahead.type is Token.Keyword:
-            value = self.lookahead.value
-            if value == 'export':
-                if not self.context.isModule:
-                    self.tolerateUnexpectedToken(self.lookahead, Messages.IllegalExportDeclaration)
-                statement = self.parseExportDeclaration()
-            elif value == 'import':
-                if self.matchImportCall():
-                    statement = self.parseExpressionStatement()
-                else:
-                    if not self.context.isModule:
-                        self.tolerateUnexpectedToken(self.lookahead, Messages.IllegalImportDeclaration)
-                    statement = self.parseImportDeclaration()
-            elif value == 'const':
-                statement = self.parseLexicalDeclaration(Params(inFor=False))
-            elif value == 'function':
-                statement = self.parseFunctionDeclaration()
-            elif value == 'class':
-                statement = self.parseClassDeclaration()
-            elif value == 'let':
-                statement = self.parseLexicalDeclaration(Params(inFor=False)) if self.isLexicalDeclaration() else self.parseStatement()
-            else:
-                statement = self.parseStatement()
+            parse = getattr(self, 'parseStatementListItem_Token_' + self.lookahead.value, self.parseStatement)
         else:
-            statement = self.parseStatement()
-
-        return statement
+            parse = self.parseStatement
+        return parse()
 
     def parseBlock(self):
         node = self.createNode()
@@ -2293,69 +2296,67 @@ class Parser(object):
 
     # https://tc39.github.io/ecma262/#sec-ecmascript-language-statements-and-declarations
 
+    def parseStatement_Expression(self):
+        return self.parseExpressionStatement()
+
+    parseStatement_Punctuator_parsers = {
+        '{': 'parseBlock',
+        '(': 'parseExpressionStatement',
+        ';': 'parseEmptyStatement',
+    }
+
+    def parseStatement_Punctuator(self):
+        try:
+            parse = getattr(self, self.parseStatement_Punctuator_parsers[self.lookahead.value])
+        except KeyError:
+            parse = self.parseExpressionStatement
+        return parse()
+
+    def parseStatement_Identifier(self):
+        return self.parseFunctionDeclaration() if self.matchAsyncFunction() else self.parseLabelledStatement()
+
+    parseStatement_Keyword_parsers = {
+        'break': 'parseBreakStatement',
+        'continue': 'parseContinueStatement',
+        'debugger': 'parseDebuggerStatement',
+        'do': 'parseDoWhileStatement',
+        'for': 'parseForStatement',
+        'function': 'parseFunctionDeclaration',
+        'if': 'parseIfStatement',
+        'return': 'parseReturnStatement',
+        'switch': 'parseSwitchStatement',
+        'throw': 'parseThrowStatement',
+        'try': 'parseTryStatement',
+        'var': 'parseVariableStatement',
+        'while': 'parseWhileStatement',
+        'with': 'parseWithStatement',
+    }
+
+    def parseStatement_Keyword(self):
+        try:
+            parse = getattr(self, self.parseStatement_Keyword_parsers[self.lookahead.value])
+        except KeyError:
+            parse = self.parseExpressionStatement
+        return parse()
+
+    parseStatement_parsers = {
+        Token.BooleanLiteral: 'parseStatement_Expression',
+        Token.NullLiteral: 'parseStatement_Expression',
+        Token.NumericLiteral: 'parseStatement_Expression',
+        Token.StringLiteral: 'parseStatement_Expression',
+        Token.Template: 'parseStatement_Expression',
+        Token.RegularExpression: 'parseStatement_Expression',
+        Token.Punctuator: 'parseStatement_Punctuator',
+        Token.Identifier: 'parseStatement_Identifier',
+        Token.Keyword: 'parseStatement_Keyword',
+    }
+
     def parseStatement(self):
-        typ = self.lookahead.type
-        if typ in (
-            Token.BooleanLiteral,
-            Token.NullLiteral,
-            Token.NumericLiteral,
-            Token.StringLiteral,
-            Token.Template,
-            Token.RegularExpression,
-        ):
-            statement = self.parseExpressionStatement()
-
-        elif typ is Token.Punctuator:
-            value = self.lookahead.value
-            if value == '{':
-                statement = self.parseBlock()
-            elif value == '(':
-                statement = self.parseExpressionStatement()
-            elif value == ';':
-                statement = self.parseEmptyStatement()
-            else:
-                statement = self.parseExpressionStatement()
-
-        elif typ is Token.Identifier:
-            statement = self.parseFunctionDeclaration() if self.matchAsyncFunction() else self.parseLabelledStatement()
-
-        elif typ is Token.Keyword:
-            value = self.lookahead.value
-            if value == 'break':
-                statement = self.parseBreakStatement()
-            elif value == 'continue':
-                statement = self.parseContinueStatement()
-            elif value == 'debugger':
-                statement = self.parseDebuggerStatement()
-            elif value == 'do':
-                statement = self.parseDoWhileStatement()
-            elif value == 'for':
-                statement = self.parseForStatement()
-            elif value == 'function':
-                statement = self.parseFunctionDeclaration()
-            elif value == 'if':
-                statement = self.parseIfStatement()
-            elif value == 'return':
-                statement = self.parseReturnStatement()
-            elif value == 'switch':
-                statement = self.parseSwitchStatement()
-            elif value == 'throw':
-                statement = self.parseThrowStatement()
-            elif value == 'try':
-                statement = self.parseTryStatement()
-            elif value == 'var':
-                statement = self.parseVariableStatement()
-            elif value == 'while':
-                statement = self.parseWhileStatement()
-            elif value == 'with':
-                statement = self.parseWithStatement()
-            else:
-                statement = self.parseExpressionStatement()
-
-        else:
-            statement = self.throwUnexpectedToken(self.lookahead)
-
-        return statement
+        try:
+            parse = getattr(self, self.parseStatement_parsers[self.lookahead.type])
+        except KeyError:
+            return self.throwUnexpectedToken(self.lookahead)
+        return parse()
 
     # https://tc39.github.io/ecma262/#sec-function-definitions
 
