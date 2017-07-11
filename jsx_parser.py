@@ -129,7 +129,7 @@ class JSXParser(Parser):
         hex = False
 
         while not self.scanner.eof() and valid and not terminated:
-            ch = self.scanner.source[self.scanner.index]
+            ch = self.scanner.source.get(self.scanner.index)
             if ch == quote:
                 break
 
@@ -166,11 +166,11 @@ class JSXParser(Parser):
     # Scan the next JSX token. This replaces Scanner#lex when in JSX mode.
 
     def lexJSX(self):
-        ch = self.scanner.source[self.scanner.index]
+        ch = self.scanner.source.get(self.scanner.index)
 
         # < > / : = { }
         if ch in ('<', '>', '/', ':', '=', '{', '}'):
-            value = self.scanner.source[self.scanner.index]
+            value = self.scanner.source.get(self.scanner.index)
             self.scanner.index += 1
             return RawJSXToken(
                 type=Token.Punctuator,
@@ -184,11 +184,11 @@ class JSXParser(Parser):
         # " '
         if ch in ('\'', '"'):
             start = self.scanner.index
-            quote = self.scanner.source[self.scanner.index]
+            quote = self.scanner.source.get(self.scanner.index)
             self.scanner.index += 1
             str = ''
             while not self.scanner.eof():
-                ch = self.scanner.source[self.scanner.index]
+                ch = self.scanner.source.get(self.scanner.index)
                 self.scanner.index += 1
                 if ch == quote:
                     break
@@ -241,7 +241,7 @@ class JSXParser(Parser):
             start = self.scanner.index
             self.scanner.index += 1
             while not self.scanner.eof():
-                ch = self.scanner.source[self.scanner.index]
+                ch = self.scanner.source.get(self.scanner.index)
                 if Character.isIdentifierPart(ch) and ch != '\\':
                     self.scanner.index += 1
                 elif ch == '-':
@@ -287,7 +287,7 @@ class JSXParser(Parser):
 
         text = ''
         while not self.scanner.eof():
-            ch = self.scanner.source[self.scanner.index]
+            ch = self.scanner.source.get(self.scanner.index)
             if ch in ('{', '<'):
                 break
 
@@ -295,7 +295,7 @@ class JSXParser(Parser):
             text += ch
             if Character.isLineTerminator(ch):
                 self.scanner.lineNumber += 1
-                if ch == '\r' and self.scanner.source[self.scanner.index] == '\n':
+                if ch == '\r' and self.scanner.source.get(self.scanner.index) == '\n':
                     self.scanner.index += 1
 
                 self.scanner.lineStart = self.scanner.index
@@ -508,7 +508,7 @@ class JSXParser(Parser):
                 child = self.finalize(node, JSXNode.JSXText(token.value, raw))
                 children.append(child)
 
-            if self.scanner.source[self.scanner.index] == '{':
+            if self.scanner.source.get(self.scanner.index) == '{':
                 container = self.parseJSXExpressionContainer()
                 children.append(container)
             else:
