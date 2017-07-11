@@ -288,7 +288,7 @@ class JSXParser(Parser):
         text = ''
         while not self.scanner.eof():
             ch = self.scanner.source[self.scanner.index]
-            if ch == '{' or ch == '<':
+            if ch in ('{', '<'):
                 break
 
             self.scanner.index += 1
