@@ -97,34 +97,34 @@ class Character:
 
     @staticmethod
     def isWhiteSpace(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in WHITE_SPACE
+        return ch in WHITE_SPACE
 
     # https://tc39.github.io/ecma262/#sec-line-terminators
 
     @staticmethod
     def isLineTerminator(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in LINE_TERMINATOR
+        return ch in LINE_TERMINATOR
 
     # https://tc39.github.io/ecma262/#sec-names-and-keywords
 
     @staticmethod
     def isIdentifierStart(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in IDENTIFIER_START
+        return ch in IDENTIFIER_START
 
     @staticmethod
     def isIdentifierPart(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in IDENTIFIER_PART
+        return ch in IDENTIFIER_PART
 
     # https://tc39.github.io/ecma262/#sec-literals-numeric-literals
 
     @staticmethod
     def isDecimalDigit(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in DECIMAL_DIGIT
+        return ch in DECIMAL_DIGIT
 
     @staticmethod
     def isHexDigit(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in HEX_DIGIT
+        return ch in HEX_DIGIT
 
     @staticmethod
     def isOctalDigit(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in OCTAL_DIGIT
+        return ch in OCTAL_DIGIT
