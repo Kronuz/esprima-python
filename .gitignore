@@ -1,0 +1,13 @@
+*~
+.coverage
+.*.swp
+*.pyc
+*.pyo
+*.so
+*.o
+*.egg-info/
+build/
+dist/
+docs/_build/
+*_flymake*
+.DS_Store
