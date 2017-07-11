@@ -166,10 +166,10 @@ class JSXParser(Parser):
     # Scan the next JSX token. This replaces Scanner#lex when in JSX mode.
 
     def lexJSX(self):
-        cp = self.scanner.source.charCodeAt(self.scanner.index)
+        ch = self.scanner.source[self.scanner.index]
 
         # < > / : = { }
-        if cp in (60, 62, 47, 58, 61, 123, 125):
+        if ch in ('<', '>', '/', ':', '=', '{', '}'):
             value = self.scanner.source[self.scanner.index]
             self.scanner.index += 1
             return RawJSXToken(
@@ -182,7 +182,7 @@ class JSXParser(Parser):
             )
 
         # " '
-        if cp in (34, 39):
+        if ch in ('\'', '"'):
             start = self.scanner.index
             quote = self.scanner.source[self.scanner.index]
             self.scanner.index += 1
@@ -207,12 +207,14 @@ class JSXParser(Parser):
             )
 
         # ... or .
-        if cp == 46:
-            n1 = self.scanner.source.charCodeAt(self.scanner.index + 1)
-            n2 = self.scanner.source.charCodeAt(self.scanner.index + 2)
-            value = '...' if (n1 == 46 and n2 == 46) else '.'
+        if ch == '.':
             start = self.scanner.index
-            self.scanner.index += len(value)
+            if self.scanner.source[start + 1:start + 3] == '..':
+                value = '...'
+                self.scanner.index += 3
+            else:
+                value = '.'
+                self.scanner.index += 1
             return RawJSXToken(
                 type=Token.Punctuator,
                 value=value,
@@ -223,7 +225,7 @@ class JSXParser(Parser):
             )
 
         # `
-        if cp == 96:
+        if ch == '`':
             # Only placeholder, since it will be rescanned as a real assignment expression.
             return RawJSXToken(
                 type=Token.Template,
@@ -235,14 +237,14 @@ class JSXParser(Parser):
             )
 
         # Identifer can not contain backslash (char code 92).
-        if Character.isIdentifierStart(cp) and cp != 92:
+        if Character.isIdentifierStart(ch) and ch != '\\':
             start = self.scanner.index
             self.scanner.index += 1
             while not self.scanner.eof():
-                ch = self.scanner.source.charCodeAt(self.scanner.index)
-                if Character.isIdentifierPart(ch) and ch != 92:
+                ch = self.scanner.source[self.scanner.index]
+                if Character.isIdentifierPart(ch) and ch != '\\':
                     self.scanner.index += 1
-                elif ch == 45:
+                elif ch == '-':
                     # Hyphen (char code 45) can be part of an identifier.
                     self.scanner.index += 1
                 else:

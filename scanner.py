@@ -109,11 +109,6 @@ class Source(unicode):
         except IndexError:
             pass
 
-    def charCodeAt(self, idx):
-        ch = self[idx]
-        if ch:
-            return ord(ch)
-
 
 class Scanner:
     def __init__(self, code, handler):
@@ -166,7 +161,7 @@ class Scanner:
             )
 
         while not self.eof():
-            ch = self.source.charCodeAt(self.index)
+            ch = self.source[self.index]
             self.index += 1
             if Character.isLineTerminator(ch):
                 if self.trackComment:
@@ -182,7 +177,7 @@ class Scanner:
                     )
                     comments.append(entry)
 
-                if ch == 13 and self.source.charCodeAt(self.index) == 10:
+                if ch == '\r' and self.source[self.index] == '\n':
                     self.index += 1
 
                 self.lineNumber += 1
@@ -219,17 +214,17 @@ class Scanner:
             )
 
         while not self.eof():
-            ch = self.source.charCodeAt(self.index)
+            ch = self.source[self.index]
             if Character.isLineTerminator(ch):
-                if ch == 0x0D and self.source.charCodeAt(self.index + 1) == 0x0A:
+                if ch == '\r' and self.source[self.index + 1] == '\n':
                     self.index += 1
 
                 self.lineNumber += 1
                 self.index += 1
                 self.lineStart = self.index
-            elif ch == 0x2A:
+            elif ch == '*':
                 # Block comment ends with '*/'.
-                if self.source.charCodeAt(self.index + 1) == 0x2F:
+                if self.source[self.index + 1] == '/':
                     self.index += 2
                     if self.trackComment:
                         loc.end = Position(
@@ -272,28 +267,28 @@ class Scanner:
 
         start = self.index == 0
         while not self.eof():
-            ch = self.source.charCodeAt(self.index)
+            ch = self.source[self.index]
 
             if Character.isWhiteSpace(ch):
                 self.index += 1
             elif Character.isLineTerminator(ch):
                 self.index += 1
-                if ch == 0x0D and self.source.charCodeAt(self.index) == 0x0A:
+                if ch == '\r' and self.source[self.index] == '\n':
                     self.index += 1
 
                 self.lineNumber += 1
                 self.lineStart = self.index
                 start = True
-            elif ch == 0x2F:  # U+002F is '/'
-                ch = self.source.charCodeAt(self.index + 1)
-                if ch == 0x2F:
+            elif ch == '/':  # U+002F is '/'
+                ch = self.source[self.index + 1]
+                if ch == '/':
                     self.index += 2
                     comment = self.skipSingleLineComment(2)
                     if self.trackComment:
                         comments.extend(comment)
 
                     start = True
-                elif ch == 0x2A:  # U+002A is '*'
+                elif ch == '*':  # U+002A is '*'
                     self.index += 2
                     comment = self.skipMultiLineComment()
                     if self.trackComment:
@@ -302,9 +297,9 @@ class Scanner:
                 else:
                     break
 
-            elif start and ch == 0x2D:  # U+002D is '-'
+            elif start and ch == '-':  # U+002D is '-'
                 # U+003E is '>'
-                if self.source.charCodeAt(self.index + 1) == 0x2D and self.source.charCodeAt(self.index + 2) == 0x3E:
+                if self.source[self.index + 1:self.index + 3] == '->':
                     # '-->' is a single-line comment
                     self.index += 3
                     comment = self.skipSingleLineComment(3)
@@ -314,7 +309,7 @@ class Scanner:
                 else:
                     break
 
-            elif ch == 0x3C:  # U+003C is '<'
+            elif ch == '<':  # U+003C is '<'
                 if self.source[self.index + 1:self.index + 4] == '!--':
                     self.index += 4  # `<!--`
                     comment = self.skipSingleLineComment(4)
@@ -388,11 +383,13 @@ class Scanner:
     ))
 
     def codePointAt(self, i):
-        cp = self.source.charCodeAt(i)
+        ch = self.source[i]
 
-        if cp >= 0xD800 and cp <= 0xDBFF:
-            second = self.source.charCodeAt(i + 1)
-            if second >= 0xDC00 and second <= 0xDFFF:
+        cp = ord(ch) if ch else None
+        if cp and cp >= 0xD800 and cp <= 0xDBFF:
+            ch = self.source[i + 1]
+            second = ord(ch) if ch else None
+            if second and second >= 0xDC00 and second <= 0xDFFF:
                 first = cp
                 cp = (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000
 
@@ -437,15 +434,17 @@ class Scanner:
         start = self.index
         self.index += 1
         while not self.eof():
-            ch = self.source.charCodeAt(self.index)
-            if ch == 0x5C:
+            ch = self.source[self.index]
+            if ch == '\\':
                 # Blackslash (U+005C) marks Unicode escape sequence.
                 self.index = start
                 return self.getComplexIdentifier()
-            elif ch >= 0xD800 and ch < 0xDFFF:
-                # Need to handle surrogate pairs.
-                self.index = start
-                return self.getComplexIdentifier()
+            else:
+                cp = ord(ch) if ch else None
+                if cp and cp >= 0xD800 and cp < 0xDFFF:
+                    # Need to handle surrogate pairs.
+                    self.index = start
+                    return self.getComplexIdentifier()
 
             if Character.isIdentifierPart(ch):
                 self.index += 1
@@ -461,7 +460,7 @@ class Scanner:
 
         # '\u' (U+005C, U+0075) denotes an escaped character.
         if cp == 0x5C:
-            if self.source.charCodeAt(self.index) != 0x75:
+            if self.source[self.index] != 'u':
                 self.throwUnexpectedToken()
 
             self.index += 1
@@ -485,9 +484,9 @@ class Scanner:
             self.index += len(ch)
 
             # '\u' (U+005C, U+0075) denotes an escaped character.
-            if cp == 0x5C:
+            if cp == '0x5C':
                 id = id[:-1]
-                if self.source.charCodeAt(self.index) != 0x75:
+                if self.source[self.index] != 'u':
                     self.throwUnexpectedToken()
 
                 self.index += 1
@@ -530,7 +529,7 @@ class Scanner:
         start = self.index
 
         # Backslash (U+005C) starts an escaped character.
-        id = self.getComplexIdentifier() if self.source.charCodeAt(start) == 0x5C else self.getIdentifier()
+        id = self.getComplexIdentifier() if self.source[start] == '\\' else self.getIdentifier()
 
         # There is no keyword or literal with only one character.
         # Thus, it must be an identifier.
@@ -688,7 +687,7 @@ class Scanner:
             self.throwUnexpectedToken()
 
         if not self.eof():
-            ch = self.source.charCodeAt(self.index)
+            ch = self.source[self.index]
             if Character.isIdentifierStart(ch) or Character.isDecimalDigit(ch):
                 self.throwUnexpectedToken()
 
@@ -1144,37 +1143,38 @@ class Scanner:
                 end=self.index
             )
 
-        cp = self.source.charCodeAt(self.index)
+        ch = self.source[self.index]
 
-        if Character.isIdentifierStart(cp):
+        if Character.isIdentifierStart(ch):
             return self.scanIdentifier()
 
         # Very common: ( and ) and ;
-        if cp == 0x28 or cp == 0x29 or cp == 0x3B:
+        if ch in ('(', ')', ';'):
             return self.scanPunctuator()
 
         # String literal starts with single quote (U+0027) or double quote (U+0022).
-        if cp == 0x27 or cp == 0x22:
+        if ch in ('\'', '"'):
             return self.scanStringLiteral()
 
         # Dot (.) U+002E can also start a floating-point number, hence the need
         # to check the next character.
-        if cp == 0x2E:
+        if ch == '.':
             if Character.isDecimalDigit(self.source[self.index + 1]):
                 return self.scanNumericLiteral()
 
             return self.scanPunctuator()
 
-        if Character.isDecimalDigit(cp):
+        if Character.isDecimalDigit(ch):
             return self.scanNumericLiteral()
 
         # Template literals start with ` (U+0060) for template head
         # or } (U+007D) for template middle or template tail.
-        if cp == 0x60 or (cp == 0x7D and self.curlyStack and self.curlyStack[-1] == '${'):
+        if ch == '`' or (ch == '}' and self.curlyStack and self.curlyStack[-1] == '${'):
             return self.scanTemplate()
 
         # Possible identifier start in a surrogate pair.
-        if cp >= 0xD800 and cp < 0xDFFF:
+        cp = ord(ch) if ch else None
+        if cp and cp >= 0xD800 and cp < 0xDFFF:
             if Character.isIdentifierStart(self.codePointAt(self.index)):
                 return self.scanIdentifier()
 

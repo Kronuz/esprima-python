@@ -76,28 +76,28 @@ class Character:
 
     @staticmethod
     def isWhiteSpace(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in WHITE_SPACE
+        return ch in WHITE_SPACE
 
     @staticmethod
     def isLineTerminator(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in LINE_TERMINATOR
+        return ch in LINE_TERMINATOR
 
     @staticmethod
     def isIdentifierStart(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in IDENTIFIER_START
+        return ch in IDENTIFIER_START
 
     @staticmethod
     def isIdentifierPart(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in IDENTIFIER_PART
+        return ch in IDENTIFIER_PART
 
     @staticmethod
     def isDecimalDigit(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in DECIMAL_DIGIT
+        return ch in DECIMAL_DIGIT
 
     @staticmethod
     def isHexDigit(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in HEX_DIGIT
+        return ch in HEX_DIGIT
 
     @staticmethod
     def isOctalDigit(ch):
-        return (unichr(ch) if isinstance(ch, int) else ch) in OCTAL_DIGIT
+        return ch in OCTAL_DIGIT
