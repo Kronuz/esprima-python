@@ -222,7 +222,7 @@ class Parser(object):
                         msg = Messages.StrictReservedWord
                 else:
                     msg = Messages.UnexpectedToken
-            value = token.value
+            value = getattr(token, 'value', 'UNKNOWN')
         else:
             value = 'ILLEGAL'
 
@@ -1464,7 +1464,7 @@ class Parser(object):
                 # https://tc39.github.io/ecma262/#sec-arrow-function-definitions
                 self.context.isAssignmentTarget = False
                 self.context.isBindingElement = False
-                isAsync = expr.async
+                isAsync = getattr(expr, 'async', False)
                 list = self.reinterpretAsCoverFormalsList(expr)
 
                 if list:
@@ -2615,7 +2615,7 @@ class Parser(object):
 
             statement = self.parseDirective()
             body.append(statement)
-            directive = statement.directive
+            directive = getattr(statement, 'directive', None)
             if not isinstance(directive, basestring):
                 break
 
