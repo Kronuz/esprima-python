@@ -87,9 +87,6 @@ class Marker(object):
         self.column = column
 
 
-ArrowParameterPlaceHolder = 'ArrowParameterPlaceHolder'
-
-
 class TokenEntry(Object):
     def __init__(self, type=None, value=None, regex=None, range=None, loc=None):
         self.type = type
@@ -249,10 +246,10 @@ class Parser(object):
             comments = self.scanner.scanComments()
             if comments and self.delegate:
                 for e in comments:
-                    node = {
-                        'type': 'BlockComment' if e.multiLine else 'LineComment',
-                        'value': self.scanner.source[e.slice[0]:e.slice[1]],
-                    }
+                    if e.multiLine:
+                        node = Node.BlockComment(self.scanner.source[e.slice[0]:e.slice[1]])
+                    else:
+                        node = Node.LineComment(self.scanner.source[e.slice[0]:e.slice[1]])
                     if self.config.range:
                         node.range = e.range
                     if self.config.loc:
@@ -897,11 +894,7 @@ class Parser(object):
             self.nextToken()
             if not self.match('=>'):
                 self.expect('=>')
-            expr = Node.Expression(
-                type=ArrowParameterPlaceHolder,
-                params=[],
-                async=False
-            )
+            expr = Node.ArrowParameterPlaceHolder([])
         else:
             startToken = self.lookahead
             params = []
@@ -910,11 +903,7 @@ class Parser(object):
                 self.expect(')')
                 if not self.match('=>'):
                     self.expect('=>')
-                expr = Node.Expression(
-                    type=ArrowParameterPlaceHolder,
-                    params=[expr],
-                    async=False
-                )
+                expr = Node.ArrowParameterPlaceHolder([expr])
             else:
                 arrow = False
                 self.context.isBindingElement = True
@@ -934,11 +923,7 @@ class Parser(object):
                             for expression in expressions:
                                 self.reinterpretExpressionAsPattern(expression)
                             arrow = True
-                            expr = Node.Expression(
-                                type=ArrowParameterPlaceHolder,
-                                params=expressions,
-                                async=False
-                            )
+                            expr = Node.ArrowParameterPlaceHolder(expressions)
                         elif self.match('...'):
                             if not self.context.isBindingElement:
                                 self.throwUnexpectedToken(self.lookahead)
@@ -950,11 +935,7 @@ class Parser(object):
                             for expression in expressions:
                                 self.reinterpretExpressionAsPattern(expression)
                             arrow = True
-                            expr = Node.Expression(
-                                type=ArrowParameterPlaceHolder,
-                                params=expressions,
-                                async=False
-                            )
+                            expr = Node.ArrowParameterPlaceHolder(expressions)
                         else:
                             expressions.append(self.inheritCoverGrammar(self.parseAssignmentExpression))
                         if arrow:
@@ -967,11 +948,7 @@ class Parser(object):
                     if self.match('=>'):
                         if expr.type is Syntax.Identifier and expr.name == 'yield':
                             arrow = True
-                            expr = Node.Expression(
-                                type=ArrowParameterPlaceHolder,
-                                params=[expr],
-                                async=False
-                            )
+                            expr = Node.ArrowParameterPlaceHolder([expr])
                         if not arrow:
                             if not self.context.isBindingElement:
                                 self.throwUnexpectedToken(self.lookahead)
@@ -986,11 +963,7 @@ class Parser(object):
                                 parameters = expr.expressions
                             else:
                                 parameters = [expr]
-                            expr = Node.Expression(
-                                type=ArrowParameterPlaceHolder,
-                                params=parameters,
-                                async=False
-                            )
+                            expr = Node.ArrowParameterPlaceHolder(parameters)
                     self.context.isBindingElement = False
 
         return expr
@@ -1133,11 +1106,7 @@ class Parser(object):
                 if asyncArrow and self.match('=>'):
                     for arg in args:
                         self.reinterpretExpressionAsPattern(arg)
-                    expr = Node.Expression(
-                        type=ArrowParameterPlaceHolder,
-                        params=args,
-                        async=True
-                    )
+                    expr = Node.AsyncArrowParameterPlaceHolder(args)
             elif self.match('['):
                 self.context.isBindingElement = False
                 self.context.isAssignmentTarget = True
@@ -1397,7 +1366,7 @@ class Parser(object):
         typ = expr.type
         if typ is Syntax.Identifier:
             pass
-        elif typ is ArrowParameterPlaceHolder:
+        elif typ is Syntax.ArrowParameterPlaceHolder:
             params = expr.params
             asyncArrow = expr.async
         else:
@@ -1450,13 +1419,9 @@ class Parser(object):
                 if self.lookahead.type is Token.Identifier or self.matchKeyword('yield'):
                     arg = self.parsePrimaryExpression()
                     self.reinterpretExpressionAsPattern(arg)
-                    expr = Node.Expression(
-                        type=ArrowParameterPlaceHolder,
-                        params=[arg],
-                        async=True
-                    )
+                    expr = Node.AsyncArrowParameterPlaceHolder([arg])
 
-            if expr.type is ArrowParameterPlaceHolder or self.match('=>'):
+            if expr.type is Syntax.ArrowParameterPlaceHolder or self.match('=>'):
 
                 # https://tc39.github.io/ecma262/#sec-arrow-function-definitions
                 self.context.isAssignmentTarget = False

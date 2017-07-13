@@ -31,13 +31,6 @@ class Node(Object):
     pass
 
 
-class Expression(Node):
-    def __init__(self, type, params, async):
-        self.type = type
-        self.params = params
-        self.async = async
-
-
 class ArrayExpression(Node):
     def __init__(self, elements):
         self.type = Syntax.ArrayExpression
@@ -572,3 +565,29 @@ class YieldExpression(Node):
         self.type = Syntax.YieldExpression
         self.argument = argument
         self.delegate = delegate
+
+
+class ArrowParameterPlaceHolder(Node):
+    def __init__(self, params):
+        self.type = Syntax.ArrowParameterPlaceHolder
+        self.params = params
+        self.async = False
+
+
+class AsyncArrowParameterPlaceHolder(Node):
+    def __init__(self, params):
+        self.type = Syntax.ArrowParameterPlaceHolder
+        self.params = params
+        self.async = True
+
+
+class BlockComment(Node):
+    def __init__(self, value):
+        self.type = Syntax.BlockComment
+        self.value = value
+
+
+class LineComment(Node):
+    def __init__(self, value):
+        self.type = Syntax.LineComment
+        self.value = value

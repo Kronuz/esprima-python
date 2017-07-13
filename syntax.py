@@ -92,3 +92,7 @@ class Syntax:
     WhileStatement = "WhileStatement"
     WithStatement = "WithStatement"
     YieldExpression = "YieldExpression"
+
+    ArrowParameterPlaceHolder = "ArrowParameterPlaceHolder"
+    BlockComment = "BlockComment"
+    LineComment = "LineComment"
