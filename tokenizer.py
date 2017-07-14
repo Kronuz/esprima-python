@@ -81,11 +81,11 @@ class Reader(object):
             # Dividing a function by anything makes little sense,
             # but we have to check for that.
             regex = False
-            if self.values[self.curly - 3] == 'function':
+            if len(self.values) >= 3 and self.values[self.curly - 3] == 'function':
                 # Anonymous function, e.g. function(){} /42
                 check = self.values[self.curly - 4]
                 regex = not self.beforeFunctionExpression(check) if check else False
-            elif self.values[self.curly - 4] == 'function':
+            elif len(self.values) >= 4 and self.values[self.curly - 4] == 'function':
                 # Named function, e.g. function f(){} /42/
                 check = self.values[self.curly - 5]
                 regex = not self.beforeFunctionExpression(check) if check else True
