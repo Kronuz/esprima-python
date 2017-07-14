@@ -62,7 +62,10 @@ class Reader(object):
     # Determine if forward slash (/) is an operator or part of a regular expression
     # https://github.com/mozilla/sweet.js/wiki/design
     def isRegexStart(self):
-        previous = self.values[-1] if self.values else None
+        if not self.values:
+            return True
+
+        previous = self.values[-1]
         regex = previous is not None
 
         if previous in (
