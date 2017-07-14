@@ -789,9 +789,10 @@ class Scanner(object):
         if Character.isIdentifierStart(self.source[self.index]):
             self.throwUnexpectedToken()
 
+        value = float(num)
         return RawToken(
             type=Token.NumericLiteral,
-            value=float(num),
+            value=int(value) if value.is_integer() else value,
             lineNumber=self.lineNumber,
             lineStart=self.lineStart,
             start=start,
