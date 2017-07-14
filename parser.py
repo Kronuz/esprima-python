@@ -159,6 +159,7 @@ class Parser(object):
             strict=False
         )
         self.tokens = []
+        self.comments = []
 
         self.startMarker = Marker(
             index=0,
@@ -244,7 +245,7 @@ class Parser(object):
             self.scanner.scanComments()
         else:
             comments = self.scanner.scanComments()
-            if comments and self.delegate:
+            if comments:
                 for e in comments:
                     if e.multiLine:
                         node = Node.BlockComment(self.scanner.source[e.slice[0]:e.slice[1]])
@@ -254,19 +255,21 @@ class Parser(object):
                         node.range = e.range
                     if self.config.loc:
                         node.loc = e.loc
-                    metadata = SourceLocation(
-                        start=Position(
-                            line=e.loc.start.line,
-                            column=e.loc.start.column,
-                            offset=e.range[0],
-                        ),
-                        end=Position(
-                            line=e.loc.end.line,
-                            column=e.loc.end.column,
-                            offset=e.range[1],
+                    self.comments.append(node)
+                    if self.delegate:
+                        metadata = SourceLocation(
+                            start=Position(
+                                line=e.loc.start.line,
+                                column=e.loc.start.column,
+                                offset=e.range[0],
+                            ),
+                            end=Position(
+                                line=e.loc.end.line,
+                                column=e.loc.end.column,
+                                offset=e.range[1],
+                            )
                         )
-                    )
-                    self.delegate(node, metadata)
+                        self.delegate(node, metadata)
 
     # From internal representation to an external structure
 

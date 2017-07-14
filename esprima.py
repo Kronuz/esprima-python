@@ -45,6 +45,9 @@ def parse(code, options={}, delegate=None):
     if parser.config.tokens:
         ast.tokens = parser.tokens
 
+    if parser.config.comment:
+        ast.comments = parser.comments
+
     if parser.config.tolerant:
         ast.errors = parser.errorHandler.errors
 
