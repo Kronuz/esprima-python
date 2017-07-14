@@ -26,7 +26,7 @@ from __future__ import absolute_import, unicode_literals, print_function, divisi
 import sys
 
 from .compat import unicode
-from .esprima import parse, Error
+from .esprima import parse, tokenize, Error
 from . import __version__
 
 
@@ -56,6 +56,9 @@ def main(argv):
     parser.add_option("--tolerant", dest="tolerant", default=False,
                       action="store_true",
                       help="Tolerate errors on a best-effort basis (experimental)")
+    parser.add_option("--tokenize", dest="tokenize", default=False,
+                      action="store_true",
+                      help="Only tokenize, do not parse.")
     parser.add_option("--module", dest="sourceType", default='string',
                       action="store_const", const='module',
                       help="Tolerate errors on a best-effort basis (experimental)")
@@ -72,10 +75,18 @@ def main(argv):
         code = sys.stdin.read().decode('utf-8')
 
     options = opts.__dict__
+    do_tokenize = options.pop('tokenize')
 
     t = time.time()
     try:
-        res = parse(code, options=options)
+        if do_tokenize:
+            del options['sourceType']
+            del options['tokens']
+            del options['raw']
+            del options['jsx']
+            res = tokenize(code, options)
+        else:
+            res = parse(code, options=options)
     except Error as e:
         res = e.toDict()
     dt = time.time() - t + 0.000000001
