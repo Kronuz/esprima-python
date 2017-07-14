@@ -564,7 +564,8 @@ class Scanner(object):
 
         elif str == '}':
             self.index += 1
-            self.curlyStack.pop()
+            if self.curlyStack:
+                self.curlyStack.pop()
 
         elif str in (
             ')',
@@ -991,7 +992,8 @@ class Scanner(object):
             self.throwUnexpectedToken()
 
         if not head:
-            self.curlyStack.pop()
+            if self.curlyStack:
+                self.curlyStack.pop()
 
         return RawToken(
             type=Token.Template,
@@ -1185,7 +1187,7 @@ class Scanner(object):
 
         # Template literals start with ` (U+0060) for template head
         # or } (U+007D) for template middle or template tail.
-        if cp == 0x60 or (cp == 0x7D and self.curlyStack[-1] == '${'):
+        if cp == 0x60 or (cp == 0x7D and self.curlyStack and self.curlyStack[-1] == '${'):
             return self.scanTemplate()
 
         # Possible identifier start in a surrogate pair.
