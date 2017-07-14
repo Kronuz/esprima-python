@@ -34,7 +34,7 @@ class Error(Exception):
         self.index = index
         self.lineNumber = lineNumber
         self.column = column
-        self.description = description
+        # self.description = description
 
     def toString(self):
         return '%s: %s' % (self.__class__.__name__, self)

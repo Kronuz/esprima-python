@@ -60,7 +60,7 @@ def test_factory(_path):
             return
 
         if '/comment/' in filename:
-            return  # Until comments are complete
+            return  # FIXME: Until comments are complete
 
         def test(self):
             with open(result_file) as f:
