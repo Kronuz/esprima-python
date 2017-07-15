@@ -26,7 +26,7 @@ from __future__ import absolute_import, unicode_literals
 import re
 
 from .objects import Object
-from .compat import xrange, unicode, unichr, uniord, PY3
+from .compat import xrange, unicode, uchr, uord
 from .character import Character, HEX_CONV, OCTAL_CONV
 from .messages import Messages
 from .token import Token
@@ -370,7 +370,7 @@ class Scanner(object):
     ))
 
     def codePointAt(self, i):
-        return uniord(self.source[i:i + 2])
+        return uord(self.source[i:i + 2])
 
     def scanHexEscape(self, prefix):
         length = 4 if prefix == 'u' else 2
@@ -384,7 +384,7 @@ class Scanner(object):
             else:
                 return None
 
-        return unichr(code)
+        return uchr(code)
 
     def scanUnicodeCodePointEscape(self):
         ch = self.source[self.index]
@@ -857,7 +857,7 @@ class Scanner(object):
                             octToDec = self.octalToDecimal(ch)
 
                             octal = octToDec.octal or octal
-                            str += unichr(octToDec.code)
+                            str += uchr(octToDec.code)
                         else:
                             str += ch
 
@@ -1023,7 +1023,7 @@ class Scanner(object):
                 if codePoint > 0x10FFFF:
                     self.throwUnexpectedToken(Messages.InvalidRegExp)
                 if codePoint <= 0xFFFF:
-                    return unichr(codePoint)
+                    return uchr(codePoint)
                 return astralSubstitute
             tmp = re.sub(r'\\u\{([0-9a-fA-F]+)\}|\\u([a-fA-F0-9]{4})', astralSub, tmp)
 

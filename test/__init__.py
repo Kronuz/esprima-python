@@ -30,8 +30,7 @@ import glob
 import fnmatch
 import unittest
 
-from ..objects import toDict
-from ..esprima import parse, tokenize, Error
+from esprima import parse, tokenize, Error, toDict
 
 BASE_DIR = os.path.dirname(__file__)
 

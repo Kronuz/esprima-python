@@ -28,11 +28,11 @@ import sys
 import unicodedata
 from collections import defaultdict
 
-from .compat import unichr, xrange
+from .compat import uchr, xrange
 
 # http://stackoverflow.com/questions/14245893/efficiently-list-all-characters-in-a-given-unicode-category
 U_CATEGORIES = defaultdict(list)
-for c in map(unichr, xrange(sys.maxunicode + 1)):
+for c in map(uchr, xrange(sys.maxunicode + 1)):
     U_CATEGORIES[unicodedata.category(c)].append(c)
 UNICODE_LETTER = set(
     U_CATEGORIES['Lu'] + U_CATEGORIES['Ll'] +
@@ -86,7 +86,7 @@ HEX_DIGIT = set(HEX_CONV.keys())
 class Character:
     @staticmethod
     def fromCodePoint(code):
-        return unichr(code)
+        return uchr(code)
 
     # https://tc39.github.io/ecma262/#sec-white-space
 

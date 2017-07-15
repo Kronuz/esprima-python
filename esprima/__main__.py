@@ -25,18 +25,16 @@ from __future__ import absolute_import, unicode_literals, print_function, divisi
 
 import sys
 
-from .compat import unicode
 from .esprima import parse, tokenize, Error
-from . import __version__
+from . import version
 
 
-def main(argv):
+def main():
     import json
     import time
     import optparse
 
     usage = "usage: %prog [options] [file.js]"
-    version = ".".join(unicode(n) for n in __version__)
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option("--comment", dest="comment",
                       action="store_true", default=False,
@@ -100,5 +98,5 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    retval = main(sys.argv)
+    retval = main()
     sys.exit(retval)

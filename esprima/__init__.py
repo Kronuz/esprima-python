@@ -21,52 +21,12 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
 
-import sys
+version = '4.0.0-dev'
+__version__ = (4, 0, 0)
 
-PY3 = sys.version_info >= (3, 0)
-
-if PY3:
-    # Python 3:
-    basestring = str
-    long = int
-    xrange = range
-    unicode = str
-    unichr = chr
-
-    def uniord(ch):
-        return ord(ch[0])
-
-else:
-    basestring = basestring
-    long = long
-    xrange = xrange
-    unicode = unicode
-
-    try:
-        # Python 2 UCS4:
-        unichr(0x10000)
-        unichr = unichr
-
-        def uniord(ch):
-            return ord(ch[0])
-
-    except ValueError:
-        # Python 2 UCS2:
-        def unichr(code):
-            # UTF-16 Encoding
-            if code <= 0xFFFF:
-                return unichr(code)
-            cu1 = ((code - 0x10000) >> 10) + 0xD800
-            cu2 = ((code - 0x10000) & 1023) + 0xDC00
-            return unichr(cu1) + unichr(cu2)
-
-        def uniord(ch):
-            cp = ord(ch[0])
-            if cp >= 0xD800 and cp <= 0xDBFF:
-                second = ord(ch[1])
-                if second >= 0xDC00 and second <= 0xDFFF:
-                    first = cp
-                    cp = (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000
-            return cp
+from .objects import toDict  # NOQA
+from .esprima import parse, parseModule, parseScript, tokenize  # NOQA
+from .error_handler import Error  # NOQA
+from .syntax import Syntax  # NOQA

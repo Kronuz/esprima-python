@@ -21,8 +21,52 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
-__version__ = (4, 0, 0)
+import sys
 
-from .esprima import parse, parseModule, parseScript, tokenize, Error, Syntax  # NOQA
+PY3 = sys.version_info >= (3, 0)
+
+if PY3:
+    # Python 3:
+    basestring = str
+    long = int
+    xrange = range
+    unicode = str
+    uchr = chr
+
+    def uord(ch):
+        return ord(ch[0])
+
+else:
+    basestring = basestring
+    long = long
+    xrange = xrange
+    unicode = unicode
+
+    try:
+        # Python 2 UCS4:
+        unichr(0x10000)
+        uchr = unichr
+
+        def uord(ch):
+            return ord(ch[0])
+
+    except ValueError:
+        # Python 2 UCS2:
+        def uchr(code):
+            # UTF-16 Encoding
+            if code <= 0xFFFF:
+                return unichr(code)
+            cu1 = ((code - 0x10000) >> 10) + 0xD800
+            cu2 = ((code - 0x10000) & 1023) + 0xDC00
+            return unichr(cu1) + unichr(cu2)
+
+        def uord(ch):
+            cp = ord(ch[0])
+            if cp >= 0xD800 and cp <= 0xDBFF:
+                second = ord(ch[1])
+                if second >= 0xDC00 and second <= 0xDFFF:
+                    first = cp
+                    cp = (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000
+            return cp

@@ -23,7 +23,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from .compat import unichr
+from .compat import uchr
 from .character import Character
 from . import jsx_nodes as JSXNode
 from .jsx_syntax import JSXSyntax
@@ -151,9 +151,9 @@ class JSXParser(Parser):
             # e.g. '&#x41;' becomes just '#x41'
             st = result[1:-1]
             if numeric and len(st) > 1:
-                result = unichr(int(st[1:], 10))
+                result = uchr(int(st[1:], 10))
             elif hex and len(st) > 2:
-                result = unichr(int(st[2:], 16))
+                result = uchr(int(st[2:], 16))
             elif not numeric and not hex and st in XHTMLEntities:
                 result = XHTMLEntities[st]
 
