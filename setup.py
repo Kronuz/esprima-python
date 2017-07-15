@@ -23,7 +23,7 @@ setup(
     packages=[
         'esprima',
     ],
-    url='http://github.com/Kronuz/exprima-python',
+    url='https://github.com/Kronuz/esprima-python',
     license='BSD',
     keywords='esprima ecmascript javascript parser',
     description="ECMAScript parsing infrastructure for multipurpose analysis in Python",
