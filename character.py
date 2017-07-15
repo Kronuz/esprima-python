@@ -86,12 +86,7 @@ HEX_DIGIT = set(HEX_CONV.keys())
 class Character:
     @staticmethod
     def fromCodePoint(code):
-        # UTF-16 Encoding
-        if (code <= 0xFFFF):
-            return unichr(code)
-        cu1 = ((code - 0x10000) >> 10) + 0xD800
-        cu2 = ((code - 0x10000) & 1023) + 0xDC00
-        return unichr(cu1) + unichr(cu2)
+        return unichr(code)
 
     # https://tc39.github.io/ecma262/#sec-white-space
 

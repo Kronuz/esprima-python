@@ -23,6 +23,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from .compat import unichr
 from .character import Character
 from . import jsx_nodes as JSXNode
 from .jsx_syntax import JSXSyntax

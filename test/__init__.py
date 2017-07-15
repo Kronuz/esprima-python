@@ -21,7 +21,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
 
 import os
 import re
@@ -35,11 +35,11 @@ from ..esprima import parse, tokenize, Error
 
 BASE_DIR = os.path.dirname(__file__)
 
-SOURCE_RE = re.compile(r'''^var\s+source\s*=\s*(['"])(.*)\1;\s*$''', re.DOTALL)
+SOURCE_RE = re.compile(br'''^var\s+source\s*=\s*(['"])(.*)\1;\s*$''', re.DOTALL)
 
 EXPECTED_FAULRES = (
-    (b'TestExpression', 'u_flag_surrogate_pair'),  # Regex comes with no value
-    (b'TestTokenize', 'migrated_0005'),  # Doesn't add Punctuator and Nueric?
+    ('TestExpression', u'u_flag_surrogate_pair'),  # Regex comes with no value
+    ('TestTokenize', u'migrated_0005'),  # Doesn't add Punctuator and Nueric?
 )
 
 
@@ -63,17 +63,19 @@ def test_factory(_path):
             return  # FIXME: Until comments are complete
 
         def test(self):
-            with open(result_file) as f:
-                expected_json = f.read().decode('utf-8')
-            expected = toDict(json.loads(expected_json))
+            with open(result_file, 'rb') as f:
+                expected_json = f.read()
+            expected = toDict(json.loads(expected_json.decode('utf-8')))
             if isinstance(expected, dict):
                 expected.pop('description', None)  # Not all json failure files include description
                 expected.pop('tokenize', None)  # tokenize is not part of errors
 
-            with open(filename) as f:
-                actual_code = f.read().decode('utf-8')
+            with open(filename, 'rb') as f:
+                actual_code = f.read()
             if '.source.' in filename:
                 actual_code = SOURCE_RE.sub(r'\2', actual_code).decode('unicode_escape')
+            else:
+                actual_code = actual_code.decode('utf-8')
 
             try:
                 if result_type == '.tokens':
@@ -127,8 +129,8 @@ def test_factory(_path):
 
             self.assertEqual(expected, actual)
 
-        test_name = os.path.basename(os.path.splitext(filename)[0]).replace('-', ' ').replace('.', ' ').encode('utf-8')
-        test_name = test_name.lower().replace(' ', '_')
+        test_name = os.path.basename(os.path.splitext(filename)[0]).replace('-', ' ').replace('.', ' ')
+        test_name = test_name.lower().replace(u' ', u'_')
 
         return test_name, test
 
@@ -188,8 +190,8 @@ class TestEsprima(unittest.TestCase):
 
 
 for fixture_path in glob.glob(os.path.join(BASE_DIR, 'fixtures', '*')):
-    class_name = os.path.basename(fixture_path).replace('-', ' ').replace('.', ' ').encode('utf-8')
-    class_name = b'Test%s' % b''.join((n if n.isupper() else n.capitalize()) for n in class_name.split())
+    class_name = os.path.basename(fixture_path).replace('-', ' ').replace('.', ' ')
+    class_name = 'Test%s' % ''.join((n if n.isupper() else n.capitalize()) for n in class_name.split())
     Test = type(class_name, (unittest.TestCase,), {'maxDiff': None})  # {'maxDiff': None}
     globals()[class_name] = Test
     for path in glob.glob(os.path.join(fixture_path, '*')):

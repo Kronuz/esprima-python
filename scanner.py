@@ -26,7 +26,7 @@ from __future__ import absolute_import, unicode_literals
 import re
 
 from .objects import Object
-from .compat import xrange, unicode
+from .compat import xrange, unicode, unichr, uniord, PY3
 from .character import Character, HEX_CONV, OCTAL_CONV
 from .messages import Messages
 from .token import Token
@@ -370,17 +370,7 @@ class Scanner(object):
     ))
 
     def codePointAt(self, i):
-        ch = self.source[i]
-
-        cp = ord(ch)
-        if cp >= 0xD800 and cp <= 0xDBFF:
-            ch = self.source[i + 1]
-            second = ord(ch)
-            if second >= 0xDC00 and second <= 0xDFFF:
-                first = cp
-                cp = (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000
-
-        return cp
+        return uniord(self.source[i:i + 2])
 
     def scanHexEscape(self, prefix):
         length = 4 if prefix == 'u' else 2
