@@ -23,7 +23,7 @@
 
 from __future__ import absolute_import
 
-version = '4.0.0-dev.1'
+version = '4.0.0-dev.2'
 __version__ = (4, 0, 0)
 
 from .objects import toDict  # NOQA
