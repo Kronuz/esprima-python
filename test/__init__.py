@@ -75,12 +75,12 @@ def test_factory(_path):
 
             try:
                 if result_type == '.tokens':
-                    actual = tokenize(actual_code, options={
+                    actual = toDict(tokenize(actual_code, options={
                         'loc': True,
                         'range': True,
                         'comment': True,
                         'tolerant': True,
-                    })
+                    }))
                 else:
                     sourceType = 'module' if '.module.' in filename else 'script'
                     options = {
@@ -124,7 +124,7 @@ def test_factory(_path):
                     if options['loc']:
                         options['source'] = expected.get('loc', {}).get('source')
 
-                    actual = parse(actual_code, options=options)
+                    actual = toDict(parse(actual_code, options=options))
             except Error as e:
                 actual = e.toDict()
 
@@ -176,7 +176,7 @@ class TestEsprima(unittest.TestCase):
             ]
         }
 
-        actual = parse('var $ = "Hello!"')
+        actual = toDict(parse('var $ = "Hello!"'))
 
         self.assertEqual(expected, actual)
 

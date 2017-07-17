@@ -23,7 +23,6 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from .objects import toDict
 from .syntax import Syntax  # NOQA
 from .error_handler import Error  # NOQA
 from .parser import Parser
@@ -68,7 +67,7 @@ def parse(code, options={}, delegate=None):
     if parser.config.tolerant:
         ast.errors = parser.errorHandler.errors
 
-    return toDict(ast)
+    return ast
 
 
 def parseModule(code, options={}, delegate=None):
@@ -105,4 +104,4 @@ def tokenize(code, options={}, delegate=None):
     if tokenizer.errorHandler.tolerant:
         tokens.errors = tokenizer.errors()
 
-    return toDict(tokens)
+    return tokens

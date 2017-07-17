@@ -24,6 +24,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import re
+import json
 
 from .compat import unicode
 
@@ -46,6 +47,9 @@ def toDict(obj):
 class Object(object):
     def toDict(self):
         return toDict(self.__dict__)
+
+    def __repr__(self):
+        return '{ %s }' % ', '.join('%s: %s' % (k, json.dumps(v) if isinstance(v, unicode) else repr(v)) for k, v in self.__dict__.items() if v is not None)
 
     def __getattr__(self, name):
         return None
