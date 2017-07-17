@@ -23,6 +23,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from .objects import toDict  # NOQA
 from .syntax import Syntax  # NOQA
 from .error_handler import Error  # NOQA
 from .parser import Parser

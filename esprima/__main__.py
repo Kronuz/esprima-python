@@ -25,7 +25,7 @@ from __future__ import absolute_import, unicode_literals, print_function, divisi
 
 import sys
 
-from .esprima import parse, tokenize, Error
+from .esprima import parse, tokenize, Error, toDict
 from . import version
 
 
@@ -85,9 +85,9 @@ def main():
             del options['tokens']
             del options['raw']
             del options['jsx']
-            res = tokenize(code, options=options)
+            res = toDict(tokenize(code, options=options))
         else:
-            res = parse(code, options=options)
+            res = toDict(parse(code, options=options))
     except Error as e:
         res = e.toDict()
     dt = time.time() - t + 0.000000001
