@@ -50,6 +50,7 @@ class Position(Object):
     def __init__(self, line=None, column=None, offset=None):
         self.line = line
         self.column = column
+        self.offset = offset
 
 
 class SourceLocation(Object):

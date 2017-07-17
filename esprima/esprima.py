@@ -27,26 +27,43 @@ from .objects import toDict
 from .syntax import Syntax  # NOQA
 from .error_handler import Error  # NOQA
 from .parser import Parser
+from .comment_handler import CommentHandler
 from .jsx_parser import JSXParser
 from .tokenizer import Tokenizer
 
 
 def parse(code, options={}, delegate=None):
-    if options.get('jsx', False):
-        parser = JSXParser(code, options=options, delegate=delegate)
-    else:
-        parser = Parser(code, options=options, delegate=delegate)
+    commentHandler = None
 
-    if options.get('sourceType', 'script') == 'module':
-        ast = parser.parseModule()
+    def proxyDelegate(node, metadata):
+        if delegate:
+            delegate(node, metadata)
+        if commentHandler:
+            commentHandler.visit(node, metadata)
+
+    parserDelegate = None if delegate is None else proxyDelegate
+    collectComment = options.get('comment', False)
+    attachComment = options.get('attachComment', False)
+    if collectComment or attachComment:
+        commentHandler = CommentHandler()
+        commentHandler.attach = attachComment
+        options['comment'] = True
+        parserDelegate = proxyDelegate
+
+    isModule = options.get('sourceType', 'script') == 'module'
+
+    if options.get('jsx', False):
+        parser = JSXParser(code, options=options, delegate=parserDelegate)
     else:
-        ast = parser.parseScript()
+        parser = Parser(code, options=options, delegate=parserDelegate)
+
+    ast = parser.parseModule() if isModule else parser.parseScript()
+
+    if collectComment and commentHandler:
+        ast.comments = commentHandler.comments
 
     if parser.config.tokens:
         ast.tokens = parser.tokens
-
-    if parser.config.comment:
-        ast.comments = parser.comments
 
     if parser.config.tolerant:
         ast.errors = parser.errorHandler.errors

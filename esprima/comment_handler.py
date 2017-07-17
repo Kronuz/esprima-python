@@ -24,150 +24,150 @@
 from __future__ import absolute_import, unicode_literals
 
 from .objects import Object
-from .scanner import SourceLocation
+from .nodes import Node
 from .syntax import Syntax
 
 
-class Comment(Object):
-    type
-    value
-    range?
-    loc?
+class Comment(Node):
+    def __init__(self, type, value, range=None, loc=None):
+        self.type = type
+        self.value = value
+        self.range = range
+        self.loc = loc
 
 
 class Entry(Object):
-    comment
-    start
+    def __init__(self, comment, start):
+        self.comment = comment
+        self.start = start
 
 
 class NodeInfo(Object):
-    node: any
-    start
+    def __init__(self, node, start):
+        self.node = node
+        self.start = start
 
 
-class CommentHandler {
-    attach
-    comments
-    stack
-    leading
-    trailing
-
-    constructor(:
-        self.attach = false
+class CommentHandler(object):
+    def __init__(self):
+        self.attach = False
         self.comments = []
         self.stack = []
         self.leading = []
         self.trailing = []
 
-    insertInnerComments(node, metadata:
+    def insertInnerComments(self, node, metadata):
         #  innnerComments for properties empty block
         #  `function a(:/** comments **\/}`
-        if node.type == Syntax.BlockStatement && node.body.length == 0:
+        if node.type is Syntax.BlockStatement and not node.body:
             innerComments = []
-            for i = self.leading.length - 1 i >= 0 --i:
-                entry = self.leading[i]
+            for i, entry in enumerate(self.leading):
                 if metadata.end.offset >= entry.start:
-                    innerComments.unshift(entry.comment)
-                    self.leading.splice(i, 1)
-                    self.trailing.splice(i, 1)
-            if innerComments.length:
+                    innerComments.append(entry.comment)
+                    self.leading[i] = None
+                    self.trailing[i] = None
+            if innerComments:
                 node.innerComments = innerComments
+                self.leading = [v for v in self.leading if v is not None]
+                self.trailing = [v for v in self.trailing if v is not None]
 
-    findTrailingComments(metadata:
+    def findTrailingComments(self, metadata):
         trailingComments = []
 
-        if self.trailing.length > 0:
-            for i = self.trailing.length - 1 i >= 0 --i:
-                entry = self.trailing[i]
+        if self.trailing:
+            for i, entry in enumerate(self.trailing):
                 if entry.start >= metadata.end.offset:
-                    trailingComments.unshift(entry.comment)
-            self.trailing.length = 0
+                    trailingComments.append(entry.comment)
+            if trailingComments:
+                self.trailing = []
             return trailingComments
 
-        entry = self.stack[self.stack.length - 1]
-        if entry && entry.node.trailingComments:
+        entry = self.stack and self.stack[-1]
+        if entry and entry.node.trailingComments:
             firstComment = entry.node.trailingComments[0]
-            if firstComment && firstComment.range[0] >= metadata.end.offset:
+            if firstComment and firstComment.range[0] >= metadata.end.offset:
                 trailingComments = entry.node.trailingComments
-                delete entry.node.trailingComments
+                del entry.node.trailingComments
         return trailingComments
 
-    findLeadingComments(metadata:
+    def findLeadingComments(self, metadata):
         leadingComments = []
 
-        target
-        while self.stack.length > 0:
-            entry = self.stack[self.stack.length - 1]
-            if entry && entry.start >= metadata.start.offset:
+        target = None
+        while self.stack:
+            entry = self.stack and self.stack[-1]
+            if entry and entry.start >= metadata.start.offset:
                 target = entry.node
                 self.stack.pop()
             else:
                 break
 
         if target:
-            count = target.leadingComments ? target.leadingComments.length : 0
-            for (i = count - 1 i >= 0 --i:
-                comment = target.leadingComments[i]
-                if comment.range[1] <= metadata.start.offset:
-                    leadingComments.unshift(comment)
-                    target.leadingComments.splice(i, 1)
-            if target.leadingComments && target.leadingComments.length == 0:
-                delete target.leadingComments
+            if target.leadingComments:
+                for i, comment in enumerate(target.leadingComments):
+                    if comment.range[1] <= metadata.start.offset:
+                        leadingComments.append(comment)
+                        target.leadingComments[i] = None
+            if leadingComments:
+                target.leadingComments = [v for v in target.leadingComments if v is not None]
+                if not target.leadingComments:
+                    del target.leadingComments
             return leadingComments
 
-        for (i = self.leading.length - 1 i >= 0 --i:
-            entry = self.leading[i]
-        for entry in self.leading:
+        for i, entry in enumerate(self.leading):
             if entry.start <= metadata.start.offset:
-                leadingComments.unshift(entry.comment)
-                self.leading.splice(i, 1)
+                leadingComments.append(entry.comment)
+                self.leading[i] = None
+        if leadingComments:
+            self.leading = [v for v in self.leading if v is not None]
+
         return leadingComments
 
-    visitNode(node, metadata:
-        if node.type == Syntax.Program && node.body.length > 0:
+    def visitNode(self, node, metadata):
+        if node.type is Syntax.Program and node.body:
             return
 
         self.insertInnerComments(node, metadata)
         trailingComments = self.findTrailingComments(metadata)
         leadingComments = self.findLeadingComments(metadata)
-        if leadingComments.length > 0:
+        if leadingComments:
             node.leadingComments = leadingComments
-        if trailingComments.length > 0:
+        if trailingComments:
             node.trailingComments = trailingComments
 
-        self.stack.push({
-            node: node,
-            start: metadata.start.offset
-        })
+        self.stack.append(NodeInfo(
+            node=node,
+            start=metadata.start.offset
+        ))
 
-    visitComment(node, metadata:
+    def visitComment(self, node, metadata):
         type = 'Line' if node.type[0] == 'L' else 'Block'
-        comment = {
-            type: type,
-            value: node.value
-        }
+        comment = Comment(
+            type=type,
+            value=node.value
+        )
         if node.range:
             comment.range = node.range
         if node.loc:
             comment.loc = node.loc
-        self.comments.push(comment)
+        self.comments.append(comment)
 
         if self.attach:
-            entry: Entry = {
-                comment: {
-                    type: type,
-                    value: node.value,
-                    range: [metadata.start.offset, metadata.end.offset]
-                },
-                start: metadata.start.offset
-            }
+            entry = Entry(
+                comment=Comment(
+                    type=type,
+                    value=node.value,
+                    range=[metadata.start.offset, metadata.end.offset]
+                ),
+                start=metadata.start.offset
+            )
             if node.loc:
                 entry.comment.loc = node.loc
             node.type = type
-            self.leading.push(entry)
-            self.trailing.push(entry)
+            self.leading.append(entry)
+            self.trailing.append(entry)
 
-    visit(node, metadata:
+    def visit(self, node, metadata):
         if node.type == 'LineComment':
             self.visitComment(node, metadata)
         elif node.type == 'BlockComment':

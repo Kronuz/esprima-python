@@ -94,5 +94,5 @@ class Syntax:
     YieldExpression = "YieldExpression"
 
     ArrowParameterPlaceHolder = "ArrowParameterPlaceHolder"
-    BlockComment = "Block"
-    LineComment = "Line"
+    BlockComment = "BlockComment"
+    LineComment = "LineComment"

@@ -159,7 +159,6 @@ class Parser(object):
             strict=False
         )
         self.tokens = []
-        self.comments = []
 
         self.startMarker = Marker(
             index=0,
@@ -255,7 +254,6 @@ class Parser(object):
                         node.range = e.range
                     if self.config.loc:
                         node.loc = e.loc
-                    self.comments.append(node)
                     if self.delegate:
                         metadata = SourceLocation(
                             start=Position(

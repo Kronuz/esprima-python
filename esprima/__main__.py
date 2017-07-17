@@ -39,6 +39,9 @@ def main():
     parser.add_option("--comment", dest="comment",
                       action="store_true", default=False,
                       help="Gather all line and block comments in an array")
+    parser.add_option("--attachComment", dest="attachComment",
+                      action="store_true", default=False,
+                      help="Attach comments to nodes")
     parser.add_option("--loc", dest="loc", default=False,
                       action="store_true",
                       help="Include line-column location info for each syntax node")
@@ -82,7 +85,7 @@ def main():
             del options['tokens']
             del options['raw']
             del options['jsx']
-            res = tokenize(code, options)
+            res = tokenize(code, options=options)
         else:
             res = parse(code, options=options)
     except Error as e:

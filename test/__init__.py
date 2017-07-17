@@ -58,9 +58,6 @@ def test_factory(_path):
         else:
             return
 
-        if '/comment/' in filename:
-            return  # FIXME: Until comments are complete
-
         def test(self):
             with open(result_file, 'rb') as f:
                 expected_json = f.read()
@@ -103,9 +100,14 @@ def test_factory(_path):
                             for k, v in expected.items():
                                 if k in ('leadingComments', 'trailingComments', 'innerComments'):
                                     return True
-                                if isinstance(v, dict):
+                                elif isinstance(v, dict):
                                     if hasAttachedComment(v):
                                         return True
+                                elif isinstance(v, list):
+                                    for i in v:
+                                        if isinstance(i, dict):
+                                            if hasAttachedComment(i):
+                                                return True
                             return False
                         options['attachComment'] = hasAttachedComment(expected)
 
