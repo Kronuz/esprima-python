@@ -27,7 +27,7 @@ setup(
     license='BSD License',
     keywords='esprima ecmascript javascript parser ast',
     description="ECMAScript parsing infrastructure for multipurpose analysis in Python",
-    long_description=read('README.md'),
+    long_description=read('README'),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
