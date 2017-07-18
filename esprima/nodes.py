@@ -28,7 +28,17 @@ from .syntax import Syntax
 
 
 class Node(Object):
-    pass
+    def __dir__(self):
+        return list(self.__dict__.keys())
+
+    def __iter__(self):
+        return self.__iter__
+
+    def keys(self):
+        return self.__dict__.keys()
+
+    def items(self):
+        return self.__dict__.items()
 
 
 class ArrayExpression(Node):
