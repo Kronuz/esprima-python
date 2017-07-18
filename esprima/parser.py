@@ -51,7 +51,7 @@ class Params(object):
         self.get = get
 
 
-class Config(object):
+class Config(Object):
     def __init__(self, range=False, loc=False, source=None, tokens=False, comment=False, tolerant=False, **options):
         self.range = range
         self.loc = loc

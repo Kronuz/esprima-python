@@ -33,7 +33,10 @@ from .tokenizer import Tokenizer
 from .visitor import NodeVisitor  # NOQA
 
 
-def parse(code, options={}, delegate=None):
+def parse(code, options=None, delegate=None, **kwargs):
+    options = {} if options is None else options.copy()
+    options.update(kwargs)
+
     commentHandler = None
 
     def proxyDelegate(node, metadata):
@@ -72,19 +75,20 @@ def parse(code, options={}, delegate=None):
     return ast
 
 
-def parseModule(code, options={}, delegate=None):
-    parsingOptions = options or {}
-    parsingOptions['sourceType'] = 'module'
-    return parse(code, parsingOptions, delegate)
+def parseModule(code, options=None, delegate=None, **kwargs):
+    kwargs['sourceType'] = 'module'
+    return parse(code, options, delegate, **kwargs)
 
 
-def parseScript(code, options={}, delegate=None):
-    parsingOptions = options or {}
-    parsingOptions['sourceType'] = 'script'
-    return parse(code, parsingOptions, delegate)
+def parseScript(code, options=None, delegate=None, **kwargs):
+    kwargs['sourceType'] = 'script'
+    return parse(code, options, delegate, **kwargs)
 
 
-def tokenize(code, options={}, delegate=None):
+def tokenize(code, options=None, delegate=None, **kwargs):
+    options = {} if options is None else options.copy()
+    options.update(kwargs)
+
     tokenizer = Tokenizer(code, options)
 
     class Tokens(list):

@@ -103,12 +103,14 @@ class Reader(object):
             self.values.append(None)
 
 
-class Config(object):
-    def __init__(self, tolerant=None, comment=None, range=None, loc=None):
+class Config(Object):
+    def __init__(self, tolerant=None, comment=None, range=None, loc=None, **options):
         self.tolerant = tolerant
         self.comment = comment
         self.range = range
         self.loc = loc
+        for k, v in options.items():
+            setattr(self, k, v)
 
 
 class Tokenizer(object):
