@@ -2741,7 +2741,7 @@ class Parser(object):
                 computed = self.match('[')
                 key = self.parseObjectPropertyKey()
                 value = self.parseSetterMethod()
-            elif self.match('='):
+            elif self.match('=') and self.config.esnext:
                 kind = 'init'
                 id = self.finalize(node, Node.Identifier(token.value))
                 self.context.firstCoverInitializedNameError = self.lookahead
