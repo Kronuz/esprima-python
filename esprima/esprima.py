@@ -30,6 +30,7 @@ from .parser import Parser
 from .comment_handler import CommentHandler
 from .jsx_parser import JSXParser
 from .tokenizer import Tokenizer
+from .visitor import NodeVisitor  # NOQA
 
 
 def parse(code, options={}, delegate=None):

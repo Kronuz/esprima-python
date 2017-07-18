@@ -21,16 +21,39 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from __future__ import absolute_import
+from __future__ import unicode_literals
 
-version = '4.0.0-dev.5'
-__version__ = (4, 0, 0)
+from .nodes import Node
 
-from .objects import toDict  # NOQA
-from .parser import Parser  # NOQA
-from .jsx_parser import JSXParser  # NOQA
-from .tokenizer import Tokenizer  # NOQA
-from .esprima import parse, parseModule, parseScript, tokenize  # NOQA
-from .error_handler import Error  # NOQA
-from .syntax import Syntax  # NOQA
-from .visitor import NodeVisitor  # NOQA
+
+class NodeVisitor(object):
+    """
+    A node visitor base class that walks the abstract syntax tree and calls a
+    visitor function for every node found.  This function may return a value
+    which is forwarded by the `visit` method.
+
+    This class is meant to be subclassed, with the subclass adding visitor
+    methods.
+
+    Per default the visitor functions for the nodes are ``'visit_'`` +
+    class name of the node.  So a `Module` node visit function would
+    be `visit_Module`.  This behavior can be changed by overriding
+    the `visit` method.  If no visitor function exists for a node
+    (return value `None`) the `generic_visit` visitor is used instead.
+    """
+
+    def visit(self, node):
+        """Visit a node."""
+        method = 'visit_' + node.__class__.__name__
+        visitor = getattr(self, method, self.generic_visit)
+        return visitor(node)
+
+    def generic_visit(self, node):
+        """Called if no explicit visitor function exists for a node."""
+        for field, value in node.__dict__.items():
+            if isinstance(value, list):
+                for item in value:
+                    if isinstance(item, Node):
+                        self.visit(item)
+            elif isinstance(value, Node):
+                self.visit(value)
