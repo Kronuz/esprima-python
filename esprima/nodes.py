@@ -25,6 +25,7 @@ from __future__ import absolute_import, unicode_literals
 
 from .objects import Object
 from .syntax import Syntax
+from .scanner import RegExp
 
 
 class Node(Object):
@@ -417,10 +418,10 @@ class RegexLiteral(Node):
         self.type = Syntax.Literal
         self.value = value
         self.raw = raw
-        self.regex = {
-            'pattern': pattern,
-            'flags': flags,
-        }
+        self.regex = RegExp(
+            pattern=pattern,
+            flags=flags,
+        )
 
 
 class RestElement(Node):
