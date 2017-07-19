@@ -26,11 +26,4 @@ from __future__ import absolute_import
 version = '4.0.0-dev.5'
 __version__ = (4, 0, 0)
 
-from .objects import toDict  # NOQA
-from .parser import Parser  # NOQA
-from .jsx_parser import JSXParser  # NOQA
-from .tokenizer import Tokenizer  # NOQA
-from .esprima import parse, parseModule, parseScript, tokenize  # NOQA
-from .error_handler import Error  # NOQA
-from .syntax import Syntax  # NOQA
-from .visitor import NodeVisitor  # NOQA
+from .esprima import *  # NOQA

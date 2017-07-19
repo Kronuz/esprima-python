@@ -23,14 +23,19 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from .objects import toDict  # NOQA
-from .syntax import Syntax  # NOQA
-from .error_handler import Error  # NOQA
-from .parser import Parser
 from .comment_handler import CommentHandler
+from .error_handler import Error
 from .jsx_parser import JSXParser
+from .objects import toDict
+from .parser import Parser
+from .syntax import Syntax
 from .tokenizer import Tokenizer
-from .visitor import NodeVisitor  # NOQA
+from .visitor import NodeVisitor
+from . import nodes
+
+
+__all__ = ['toDict', 'Syntax', 'Error', 'NodeVisitor', 'nodes',
+           'parse', 'parseModule', 'parseScript', 'tokenize']
 
 
 def parse(code, options=None, delegate=None, **kwargs):
