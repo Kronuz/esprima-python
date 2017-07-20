@@ -50,7 +50,9 @@ class NodeVisitor(object):
         if isinstance(node, Node):
             method = 'transform_' + node.__class__.__name__
             transformer = getattr(self, method, self.generic_transform)
-            return transformer(node, metadata)
+            new_node = transformer(node, metadata)
+            if new_node is not None and node is not new_node:
+                node = new_node
         return node
 
     def generic_transform(self, node, metadata):
@@ -62,15 +64,21 @@ class NodeVisitor(object):
         if isinstance(node, Node):
             method = 'visit_' + node.__class__.__name__
             visitor = getattr(self, method, self.generic_visit)
-            return visitor(node)
+            new_node = visitor(node)
+            if new_node is not None and node is not new_node:
+                node = new_node
         return node
 
     def generic_visit(self, node):
         """Called if no explicit visitor function exists for a node."""
-        for field, value in node.__dict__.items():
+        for field, value in list(node.__dict__.items()):
             if isinstance(value, list):
-                for item in value:
-                    self.visit(item)
+                for i, item in enumerate(value):
+                    new_item = self.visit(item)
+                    if new_item is not None and item is not new_item:
+                        value[i] = new_item
             else:
-                self.visit(value)
+                new_value = self.visit(value)
+                if new_value is not None and value is not new_value:
+                    node.__dict__[field] = new_value
         return node
