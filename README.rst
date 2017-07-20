@@ -48,19 +48,51 @@ JavaScript program.
 
 A simple example:
 
-.. code:: python
+.. code:: javascript
 
     >>> import esprima
     >>> program = 'const answer = 42'
 
     >>> esprima.tokenize(program)
-    [{ type: "Keyword", value: "const" },
-     { type: "Identifier", value: "answer" },
-     { type: "Punctuator", value: "=" },
-     { type: "Numeric", value: "42" }]
+    [{
+        type: "Keyword",
+        value: "const"
+    }, {
+        type: "Identifier",
+        value: "answer"
+    }, {
+        type: "Punctuator",
+        value: "="
+    }, {
+        type: "Numeric",
+        value: "42"
+    }]
 
     >>> esprima.parseScript(program)
-    { body: [{ kind: "const", declarations: [{ init: { raw: "42", type: "Literal", value: 42 }, type: "VariableDeclarator", id: { type: "Identifier", name: "answer" } }], type: "VariableDeclaration" }], type: "Program", sourceType: "script" }
+    {
+        body: [
+            {
+                kind: "const",
+                declarations: [
+                    {
+                        init: {
+                            raw: "42",
+                            type: "Literal",
+                            value: 42
+                        },
+                        type: "VariableDeclarator",
+                        id: {
+                            type: "Identifier",
+                            name: "answer"
+                        }
+                    }
+                ],
+                type: "VariableDeclaration"
+            }
+        ],
+        type: "Program",
+        sourceType: "script"
+    }
 
 For more information, please read the `complete
 documentation <http://esprima.org/doc>`__.
