@@ -42,18 +42,35 @@ class NodeVisitor(object):
     (return value `None`) the `generic_visit` visitor is used instead.
     """
 
+    def __call__(self, node, metadata):
+        return self.transform(node, metadata)
+
+    def transform(self, node, metadata):
+        """Transform a node."""
+        if isinstance(node, Node):
+            method = 'transform_' + node.__class__.__name__
+            transformer = getattr(self, method, self.generic_transform)
+            return transformer(node, metadata)
+        return node
+
+    def generic_transform(self, node, metadata):
+        """Called if no explicit transform function exists for a node."""
+        return node
+
     def visit(self, node):
         """Visit a node."""
-        method = 'visit_' + node.__class__.__name__
-        visitor = getattr(self, method, self.generic_visit)
-        return visitor(node)
+        if isinstance(node, Node):
+            method = 'visit_' + node.__class__.__name__
+            visitor = getattr(self, method, self.generic_visit)
+            return visitor(node)
+        return node
 
     def generic_visit(self, node):
         """Called if no explicit visitor function exists for a node."""
         for field, value in node.__dict__.items():
             if isinstance(value, list):
                 for item in value:
-                    if isinstance(item, Node):
-                        self.visit(item)
-            elif isinstance(value, Node):
+                    self.visit(item)
+            else:
                 self.visit(value)
+        return node
