@@ -267,7 +267,9 @@ class Parser(object):
                                 offset=e.range[1],
                             )
                         )
-                        self.delegate(node, metadata)
+                        new_node = self.delegate(node, metadata)
+                        if new_node is not None:
+                            node = new_node
 
     # From internal representation to an external structure
 
@@ -389,7 +391,9 @@ class Parser(object):
                     offset=self.lastMarker.index,
                 )
             )
-            self.delegate(node, metadata)
+            new_node = self.delegate(node, metadata)
+            if new_node is not None:
+                node = new_node
 
         return node
 
