@@ -63,7 +63,7 @@ def main():
     parser.add_option("--module", dest="sourceType", default='string',
                       action="store_const", const='module',
                       help="Tolerate errors on a best-effort basis (experimental)")
-    parser.set_defaults(jsx=True)
+    parser.set_defaults(jsx=True, classProperties=True)
     opts, args = parser.parse_args()
 
     if len(args) == 1:

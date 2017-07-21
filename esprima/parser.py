@@ -2746,24 +2746,33 @@ class Parser(object):
                 computed = self.match('[')
                 key = self.parseObjectPropertyKey()
                 value = self.parseSetterMethod()
+            elif self.config.classProperties and not self.match('('):
+                kind = 'init'
+                id = self.finalize(node, Node.Identifier(token.value))
+                if self.match('='):
+                    self.context.firstCoverInitializedNameError = self.lookahead
+                    self.nextToken()
+                    shorthand = True
+                    init = self.isolateCoverGrammar(self.parseAssignmentExpression)
+                    value = self.finalize(node, Node.AssignmentPattern(id, init))
+                else:
+                    shorthand = True
+                    value = id
 
         elif token.type is Token.Punctuator and token.value == '*' and lookaheadPropertyKey:
-            kind = 'init'
+            kind = 'method'
             computed = self.match('[')
             key = self.parseObjectPropertyKey()
             value = self.parseGeneratorMethod()
             method = True
 
         if not kind and key and self.match('('):
-            kind = 'init'
+            kind = 'method'
             value = self.parsePropertyMethodAsyncFunction() if isAsync else self.parsePropertyMethodFunction()
             method = True
 
         if not kind:
             self.throwUnexpectedToken(self.lookahead)
-
-        if kind == 'init':
-            kind = 'method'
 
         if not computed:
             if isStatic and self.isPropertyKey(key, 'prototype'):
@@ -2777,7 +2786,11 @@ class Parser(object):
                     hasConstructor.value = True
                 kind = 'constructor'
 
-        return self.finalize(node, Node.MethodDefinition(key, computed, value, kind, isStatic))
+        if kind == 'init':
+            return self.finalize(node, Node.Property(kind, key, computed, value, method, shorthand))
+
+        else:
+            return self.finalize(node, Node.MethodDefinition(key, computed, value, kind, isStatic))
 
     def parseClassElementList(self):
         body = []

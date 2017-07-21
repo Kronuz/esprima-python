@@ -1,0 +1,67 @@
+{
+    "body": [
+        {
+            "body": {
+                "body": [
+                    {
+                        "kind": "init",
+                        "shorthand": true,
+                        "computed": false,
+                        "value": {
+                            "right": {
+                                "raw": "1",
+                                "type": "Literal",
+                                "value": 1
+                            },
+                            "type": "AssignmentPattern",
+                            "left": {
+                                "type": "Identifier",
+                                "name": "a"
+                            }
+                        },
+                        "key": {
+                            "type": "Identifier",
+                            "name": "a"
+                        },
+                        "type": "Property",
+                        "method": false
+                    },
+                    {
+                        "kind": "init",
+                        "shorthand": true,
+                        "computed": false,
+                        "value": {
+                            "right": {
+                                "raw": "2",
+                                "type": "Literal",
+                                "value": 2
+                            },
+                            "type": "AssignmentPattern",
+                            "left": {
+                                "type": "Identifier",
+                                "name": "b"
+                            }
+                        },
+                        "key": {
+                            "type": "Identifier",
+                            "name": "b"
+                        },
+                        "type": "Property",
+                        "method": false
+                    }
+                ],
+                "type": "ClassBody"
+            },
+            "type": "ClassDeclaration",
+            "id": {
+                "type": "Identifier",
+                "name": "A"
+            }
+        }
+    ],
+    "type": "Program",
+    "sourceType": "script",
+    "options": {
+        "classProperties": true
+    }
+}
