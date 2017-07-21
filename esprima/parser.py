@@ -2702,7 +2702,6 @@ class Parser(object):
         key = None
         value = None
         computed = False
-        method = False
         isStatic = False
         isAsync = False
 
@@ -2746,30 +2745,32 @@ class Parser(object):
                 computed = self.match('[')
                 key = self.parseObjectPropertyKey()
                 value = self.parseSetterMethod()
+            elif self.config.classProperties and not self.match('('):
+                kind = 'init'
+                id = self.finalize(node, Node.Identifier(token.value))
+                if self.match('='):
+                    self.context.firstCoverInitializedNameError = self.lookahead
+                    self.nextToken()
+                    value = self.isolateCoverGrammar(self.parseAssignmentExpression)
 
         elif token.type is Token.Punctuator and token.value == '*' and lookaheadPropertyKey:
-            kind = 'init'
+            kind = 'method'
             computed = self.match('[')
             key = self.parseObjectPropertyKey()
             value = self.parseGeneratorMethod()
-            method = True
 
         if not kind and key and self.match('('):
-            kind = 'init'
+            kind = 'method'
             value = self.parsePropertyMethodAsyncFunction() if isAsync else self.parsePropertyMethodFunction()
-            method = True
 
         if not kind:
             self.throwUnexpectedToken(self.lookahead)
-
-        if kind == 'init':
-            kind = 'method'
 
         if not computed:
             if isStatic and self.isPropertyKey(key, 'prototype'):
                 self.throwUnexpectedToken(token, Messages.StaticPrototype)
             if not isStatic and self.isPropertyKey(key, 'constructor'):
-                if kind != 'method' or not method or (value and value.generator):
+                if kind != 'method' or (value and value.generator):
                     self.throwUnexpectedToken(token, Messages.ConstructorSpecialMethod)
                 if hasConstructor.value:
                     self.throwUnexpectedToken(token, Messages.DuplicateConstructor)
@@ -2777,7 +2778,11 @@ class Parser(object):
                     hasConstructor.value = True
                 kind = 'constructor'
 
-        return self.finalize(node, Node.MethodDefinition(key, computed, value, kind, isStatic))
+        if kind in ('constructor', 'method', 'get', 'set'):
+            return self.finalize(node, Node.MethodDefinition(key, computed, value, kind, isStatic))
+
+        else:
+            return self.finalize(node, Node.FieldDefinition(key, computed, value, kind, isStatic))
 
     def parseClassElementList(self):
         body = []

@@ -376,6 +376,16 @@ class MethodDefinition(Node):
         self.static = isStatic
 
 
+class FieldDefinition(Node):
+    def __init__(self, key, computed, value, kind, isStatic):
+        self.type = Syntax.FieldDefinition
+        self.key = key
+        self.computed = computed
+        self.value = value
+        self.kind = kind
+        self.static = isStatic
+
+
 class Module(Node):
     def __init__(self, body):
         self.type = Syntax.Program

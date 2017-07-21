@@ -67,6 +67,7 @@ class Syntax:
     MemberExpression = "MemberExpression"
     MetaProperty = "MetaProperty"
     MethodDefinition = "MethodDefinition"
+    FieldDefinition = "FieldDefinition"
     NewExpression = "NewExpression"
     ObjectExpression = "ObjectExpression"
     ObjectPattern = "ObjectPattern"
