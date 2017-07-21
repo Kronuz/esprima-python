@@ -130,8 +130,11 @@ def test_factory(_path):
 
             self.assertEqual(expected, actual)
 
-        test_name = os.path.basename(os.path.splitext(filename)[0]).replace('-', ' ').replace('.', ' ')
-        test_name = test_name.lower().replace(u' ', u'_')
+        test_name = os.path.basename(os.path.splitext(filename)[0])
+        test_name = re.sub(r'[-. _]+', '_', test_name)
+        if not test_name.isupper():
+            test_name = re.sub(r'(?<=[^_])([A-Z])', r'_\1', test_name)
+        test_name = test_name.lower()
 
         return test_name, test
 
@@ -192,7 +195,7 @@ class TestEsprima(unittest.TestCase):
 
 for fixture_path in glob.glob(os.path.join(BASE_DIR, 'fixtures', '*')):
     class_name = os.path.basename(fixture_path).replace('-', ' ').replace('.', ' ')
-    class_name = 'Test%s' % ''.join((n if n.isupper() else n.capitalize()) for n in class_name.split())
+    class_name = 'Test%s' % ''.join((n.capitalize() if n.islower() else n) for n in class_name.split())
     Test = type(class_name, (unittest.TestCase,), {'maxDiff': None})  # {'maxDiff': None}
     globals()[class_name] = Test
     for path in glob.glob(os.path.join(fixture_path, '*')):
