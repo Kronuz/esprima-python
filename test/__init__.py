@@ -65,6 +65,9 @@ def test_factory(_path):
             if isinstance(expected, dict):
                 expected.pop('description', None)  # Not all json failure files include description
                 expected.pop('tokenize', None)  # tokenize is not part of errors
+                options = expected.pop('options', None)  # Extracts options from tree (if any)
+            else:
+                options = None
 
             with open(filename, 'rb') as f:
                 actual_code = f.read()
@@ -75,27 +78,30 @@ def test_factory(_path):
 
             try:
                 if result_type == '.tokens':
-                    actual = toDict(tokenize(actual_code, options={
-                        'loc': True,
-                        'range': True,
-                        'comment': True,
-                        'tolerant': True,
-                    }))
+                    if options is None:
+                        options = {
+                            'loc': True,
+                            'range': True,
+                            'comment': True,
+                            'tolerant': True,
+                        }
+                    actual = toDict(tokenize(actual_code, options=options))
                 else:
                     sourceType = 'module' if '.module.' in filename else 'script'
-                    options = {
-                        'jsx': True,
-                        'comment': 'comments' in expected,
-                        'range': True,
-                        'loc': True,
-                        'tokens': True,
-                        'raw': True,
-                        'tolerant': 'errors' in expected,
-                        'source': None,
-                        'sourceType': expected.get('sourceType', sourceType),
-                    }
+                    if options is None:
+                        options = {
+                            'jsx': True,
+                            'comment': 'comments' in expected,
+                            'range': True,
+                            'loc': True,
+                            'tokens': True,
+                            'raw': True,
+                            'tolerant': 'errors' in expected,
+                            'source': None,
+                            'sourceType': expected.get('sourceType', sourceType),
+                        }
 
-                    if options['comment']:
+                    if options.get('comment'):
                         def hasAttachedComment(expected):
                             for k, v in expected.items():
                                 if k in ('leadingComments', 'trailingComments', 'innerComments'):
@@ -121,7 +127,7 @@ def test_factory(_path):
                         options['range'] = 'range' in comment
                         options['loc'] = 'loc' in comment
 
-                    if options['loc']:
+                    if options.get('loc'):
                         options['source'] = expected.get('loc', {}).get('source')
 
                     actual = toDict(parse(actual_code, options=options))
