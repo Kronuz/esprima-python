@@ -82,7 +82,7 @@ class Object(object):
                 (",%s%s%s" % (nl, sp, indent2)).join(
                     reprs.get(type(v).__name__, self.repr)((k, v), level=level + 1, indent=indent, nl=nl, sp=sp, skip=skip, reprs=reprs)
                     for k, v in obj.items()
-                    if v is not None and k[0] != '_' and k not in skip
+                    if v is not None and not k.startswith('_') and k not in skip
                 ),
                 nl,
                 indent1,

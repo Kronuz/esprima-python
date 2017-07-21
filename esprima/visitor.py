@@ -72,13 +72,14 @@ class NodeVisitor(object):
     def generic_visit(self, node):
         """Called if no explicit visitor function exists for a node."""
         for field, value in list(node.__dict__.items()):
-            if isinstance(value, list):
-                for i, item in enumerate(value):
-                    new_item = self.visit(item)
-                    if new_item is not None and item is not new_item:
-                        value[i] = new_item
-            else:
-                new_value = self.visit(value)
-                if new_value is not None and value is not new_value:
-                    node.__dict__[field] = new_value
+            if not field.startswith('_'):
+                if isinstance(value, list):
+                    for i, item in enumerate(value):
+                        new_item = self.visit(item)
+                        if new_item is not None and item is not new_item:
+                            value[i] = new_item
+                else:
+                    new_value = self.visit(value)
+                    if new_value is not None and value is not new_value:
+                        node.__dict__[field] = new_value
         return node
