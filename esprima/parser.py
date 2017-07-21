@@ -2708,6 +2708,7 @@ class Parser(object):
 
         if self.match('*'):
             self.nextToken()
+
         else:
             computed = self.match('[')
             key = self.parseObjectPropertyKey()
@@ -2745,15 +2746,7 @@ class Parser(object):
                 computed = self.match('[')
                 key = self.parseObjectPropertyKey()
                 value = self.parseSetterMethod()
-            elif self.match('=') and self.config.esnext:
-                kind = 'init'
-                id = self.finalize(node, Node.Identifier(token.value))
-                self.context.firstCoverInitializedNameError = self.lookahead
-                self.nextToken()
-                shorthand = True
-                init = self.isolateCoverGrammar(self.parseAssignmentExpression)
-                value = self.finalize(node, Node.AssignmentPattern(id, init))
-                return self.finalize(node, Node.Property(kind, key, computed, value, method, shorthand))
+
         elif token.type is Token.Punctuator and token.value == '*' and lookaheadPropertyKey:
             kind = 'init'
             computed = self.match('[')
