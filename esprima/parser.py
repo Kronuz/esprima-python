@@ -542,31 +542,35 @@ class Parser(object):
                 self.tolerateUnexpectedToken(self.lookahead)
             expr = self.parseFunctionExpression() if self.matchAsyncFunction() else self.finalize(node, Node.Identifier(self.nextToken().value))
 
-        elif typ in (
-            Token.NumericLiteral,
-            Token.StringLiteral,
-        ):
+        elif typ is Token.NumericLiteral:
             if self.context.strict and self.lookahead.octal:
                 self.tolerateUnexpectedToken(self.lookahead, Messages.StrictOctalLiteral)
             self.context.isAssignmentTarget = False
             self.context.isBindingElement = False
             token = self.nextToken()
             raw = self.getTokenRaw(token)
-            expr = self.finalize(node, Node.Literal(token.value, raw))
+            expr = self.finalize(node, Node.StringLiteral(token.value, raw))
+
+        elif typ is Token.StringLiteral:
+            self.context.isAssignmentTarget = False
+            self.context.isBindingElement = False
+            token = self.nextToken()
+            raw = self.getTokenRaw(token)
+            expr = self.finalize(node, Node.StringLiteral(token.value, raw))
 
         elif typ is Token.BooleanLiteral:
             self.context.isAssignmentTarget = False
             self.context.isBindingElement = False
             token = self.nextToken()
             raw = self.getTokenRaw(token)
-            expr = self.finalize(node, Node.Literal(token.value == 'true', raw))
+            expr = self.finalize(node, Node.BooleanLiteral(token.value == 'true', raw))
 
         elif typ is Token.NullLiteral:
             self.context.isAssignmentTarget = False
             self.context.isBindingElement = False
             token = self.nextToken()
             raw = self.getTokenRaw(token)
-            expr = self.finalize(node, Node.Literal(None, raw))
+            expr = self.finalize(node, Node.NullLiteral(raw))
 
         elif typ is Token.Template:
             expr = self.parseTemplateLiteral()
@@ -586,7 +590,7 @@ class Parser(object):
                 self.scanner.index = self.startMarker.index
                 token = self.nextRegexToken()
                 raw = self.getTokenRaw(token)
-                expr = self.finalize(node, Node.RegexLiteral(token.regex, raw, token.pattern, token.flags))
+                expr = self.finalize(node, Node.RegExpLiteral(token.pattern, token.flags, raw))
             else:
                 expr = self.throwUnexpectedToken(self.nextToken())
 
@@ -697,14 +701,15 @@ class Parser(object):
         token = self.nextToken()
 
         typ = token.type
-        if typ in (
-            Token.StringLiteral,
-            Token.NumericLiteral,
-        ):
+        if typ in Token.NumericLiteral:
             if self.context.strict and token.octal:
                 self.tolerateUnexpectedToken(token, Messages.StrictOctalLiteral)
             raw = self.getTokenRaw(token)
-            key = self.finalize(node, Node.Literal(token.value, raw))
+            key = self.finalize(node, Node.NumericLiteral(token.value, raw))
+
+        if typ is Token.StringLiteral:
+            raw = self.getTokenRaw(token)
+            key = self.finalize(node, Node.StringLiteral(token.value, raw))
 
         elif typ in (
             Token.Identifier,
@@ -2702,7 +2707,6 @@ class Parser(object):
         key = None
         value = None
         computed = False
-        method = False
         isStatic = False
         isAsync = False
 
@@ -2752,24 +2756,18 @@ class Parser(object):
                 if self.match('='):
                     self.context.firstCoverInitializedNameError = self.lookahead
                     self.nextToken()
-                    shorthand = True
-                    init = self.isolateCoverGrammar(self.parseAssignmentExpression)
-                    value = self.finalize(node, Node.AssignmentPattern(id, init))
+                    value = self.isolateCoverGrammar(self.parseAssignmentExpression)
                 else:
-                    shorthand = True
-                    value = id
+                    value = id  # ??
 
         elif token.type is Token.Punctuator and token.value == '*' and lookaheadPropertyKey:
-            kind = 'method'
             computed = self.match('[')
             key = self.parseObjectPropertyKey()
             value = self.parseGeneratorMethod()
-            method = True
 
         if not kind and key and self.match('('):
             kind = 'method'
             value = self.parsePropertyMethodAsyncFunction() if isAsync else self.parsePropertyMethodFunction()
-            method = True
 
         if not kind:
             self.throwUnexpectedToken(self.lookahead)
@@ -2778,7 +2776,7 @@ class Parser(object):
             if isStatic and self.isPropertyKey(key, 'prototype'):
                 self.throwUnexpectedToken(token, Messages.StaticPrototype)
             if not isStatic and self.isPropertyKey(key, 'constructor'):
-                if kind != 'method' or not method or (value and value.generator):
+                if kind != 'method' or (value and value.generator):
                     self.throwUnexpectedToken(token, Messages.ConstructorSpecialMethod)
                 if hasConstructor.value:
                     self.throwUnexpectedToken(token, Messages.DuplicateConstructor)
@@ -2786,11 +2784,10 @@ class Parser(object):
                     hasConstructor.value = True
                 kind = 'constructor'
 
-        if kind == 'init':
-            return self.finalize(node, Node.Property(kind, key, computed, value, method, shorthand))
-
+        if kind in ('constructor', 'method', 'get', 'set'):
+            return self.finalize(node, Node.ClassMethod(key, computed, value, kind, isStatic))
         else:
-            return self.finalize(node, Node.MethodDefinition(key, computed, value, kind, isStatic))
+            return self.finalize(node, Node.FieldDefinition(key, computed, value, kind, isStatic))
 
     def parseClassElementList(self):
         body = []
@@ -2874,7 +2871,7 @@ class Parser(object):
 
         token = self.nextToken()
         raw = self.getTokenRaw(token)
-        return self.finalize(node, Node.Literal(token.value, raw))
+        return self.finalize(node, Node.StringLiteral(token.value, raw))
 
     # import {<foo as bar>} ...
     def parseImportSpecifier(self):
