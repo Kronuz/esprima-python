@@ -25,6 +25,7 @@ from __future__ import absolute_import, unicode_literals
 
 import re
 import json
+from collections import deque
 
 from .compat import unicode
 
@@ -32,15 +33,47 @@ from .compat import unicode
 re_type = type(re.compile(r''))
 
 
-def toDict(obj):
-    if isinstance(obj, dict):
-        return dict((unicode(k), toDict(v)) for k, v in obj.items() if v is not None)
-    if isinstance(obj, list):
-        return [toDict(v) for v in obj]
-    if isinstance(obj, Object):
-        return obj.toDict()
-    if isinstance(obj, re_type):
-        return {}
+def toDict(value):
+    queue = deque()
+
+    def setup(value):
+        if isinstance(value, list):
+            obj = []
+            gen = ((None, v) for v in value)
+        elif isinstance(value, dict):
+            obj = {}
+            gen = ((k, value[k]) for k in value)
+        elif isinstance(value, Object):
+            obj = {}
+            value = value.__dict__
+            gen = ((k, value[k]) for k in value)
+        elif isinstance(value, re_type):
+            obj = {}
+            gen = None
+        else:
+            obj = value
+            gen = None
+        queue.append((obj, gen))
+        return obj
+
+    setup(value)
+
+    while queue:
+        obj, gen = queue[-1]
+
+        if gen is None:
+            queue.pop()
+        else:
+            try:
+                k, value = next(gen)
+            except StopIteration:
+                queue.pop()
+            else:
+                if k is None:
+                    obj.append(setup(value))
+                elif value is not None:
+                    obj[unicode(k)] = setup(value)
+
     return obj
 
 
