@@ -26,16 +26,18 @@ from __future__ import absolute_import, unicode_literals
 from .comment_handler import CommentHandler
 from .error_handler import Error
 from .jsx_parser import JSXParser
+from .jsx_syntax import JSXSyntax
 from .objects import toDict
 from .parser import Parser
 from .syntax import Syntax
 from .tokenizer import Tokenizer
 from .visitor import NodeVisitor
 from . import nodes
+from . import jsx_nodes
 
 
-__all__ = ['toDict', 'Syntax', 'Error', 'NodeVisitor', 'nodes',
-           'parse', 'parseModule', 'parseScript', 'tokenize']
+__all__ = ['Syntax', 'JSXSyntax', 'Error', 'NodeVisitor', 'nodes', 'jsx_nodes',
+           'parse', 'parseModule', 'parseScript', 'tokenize', 'toDict']
 
 
 def parse(code, options=None, delegate=None, **kwargs):
