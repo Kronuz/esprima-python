@@ -48,6 +48,7 @@ class Syntax:
     ExportDefaultDeclaration = "ExportDefaultDeclaration"
     ExportNamedDeclaration = "ExportNamedDeclaration"
     ExportSpecifier = "ExportSpecifier"
+    ExportDefaultSpecifier = "ExportDefaultSpecifier"
     ExpressionStatement = "ExpressionStatement"
     ForStatement = "ForStatement"
     ForOfStatement = "ForOfStatement"

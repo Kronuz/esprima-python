@@ -246,6 +246,12 @@ class ExportSpecifier(Node):
         self.local = local
 
 
+class ExportDefaultSpecifier(Node):
+    def __init__(self, local):
+        self.type = Syntax.ExportDefaultSpecifier
+        self.local = local
+
+
 class ExpressionStatement(Node):
     def __init__(self, expression):
         self.type = Syntax.ExpressionStatement

@@ -2975,6 +2975,11 @@ class Parser(object):
 
         return self.finalize(node, Node.ExportSpecifier(local, exported))
 
+    def parseExportDefaultSpecifier(self):
+        node = self.createNode()
+        local = self.parseIdentifierName()
+        return self.finalize(node, Node.ExportDefaultSpecifier(local))
+
     def parseExportDeclaration(self):
         if self.context.inFunctionBody:
             self.throwError(Messages.IllegalExportDeclaration)
@@ -3053,13 +3058,22 @@ class Parser(object):
             source = None
             isExportFromIdentifier = False
 
-            self.expect('{')
-            while not self.match('}'):
-                isExportFromIdentifier = isExportFromIdentifier or self.matchKeyword('default')
-                specifiers.append(self.parseExportSpecifier())
-                if not self.match('}'):
-                    self.expect(',')
-            self.expect('}')
+            expectSpecifiers = True
+            if self.lookahead.type is Token.Identifier:
+                specifiers.append(self.parseExportDefaultSpecifier())
+                if self.match(','):
+                    self.nextToken()
+                else:
+                    expectSpecifiers = False
+
+            if expectSpecifiers:
+                self.expect('{')
+                while not self.match('}'):
+                    isExportFromIdentifier = isExportFromIdentifier or self.matchKeyword('default')
+                    specifiers.append(self.parseExportSpecifier())
+                    if not self.match('}'):
+                        self.expect(',')
+                self.expect('}')
 
             if self.matchContextualKeyword('from'):
                 # export {default} from 'foo'
