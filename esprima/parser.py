@@ -2749,9 +2749,8 @@ class Parser(object):
                 kind = 'init'
                 id = self.finalize(node, Node.Identifier(token.value))
                 if self.match('='):
-                    self.context.firstCoverInitializedNameError = self.lookahead
                     self.nextToken()
-                    value = self.isolateCoverGrammar(self.parseAssignmentExpression)
+                    value = self.parseAssignmentExpression()
 
         elif token.type is Token.Punctuator and token.value == '*' and lookaheadPropertyKey:
             kind = 'method'
