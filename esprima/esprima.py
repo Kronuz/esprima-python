@@ -44,6 +44,11 @@ def parse(code, options=None, delegate=None, **kwargs):
     options = {} if options is None else options.copy()
     options.update(kwargs)
 
+    # ESNext presset:
+    if options.get('esnext', False):
+        options['jsx'] = True
+        options['classProperties'] = True
+
     commentHandler = None
 
     def proxyDelegate(node, metadata):
