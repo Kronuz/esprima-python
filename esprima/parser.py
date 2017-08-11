@@ -671,7 +671,7 @@ class Parser(object):
         node = self.createNode()
 
         previousAllowYield = self.context.allowYield
-        self.context.allowYield = False
+        self.context.allowYield = True
         params = self.parseFormalParameters()
         method = self.parsePropertyMethod(params)
         self.context.allowYield = previousAllowYield
@@ -2619,7 +2619,7 @@ class Parser(object):
 
         isGenerator = False
         previousAllowYield = self.context.allowYield
-        self.context.allowYield = False
+        self.context.allowYield = not isGenerator
         formalParameters = self.parseFormalParameters()
         if len(formalParameters.params) > 0:
             self.tolerateError(Messages.BadGetterArity)
@@ -2633,7 +2633,7 @@ class Parser(object):
 
         isGenerator = False
         previousAllowYield = self.context.allowYield
-        self.context.allowYield = False
+        self.context.allowYield = not isGenerator
         formalParameters = self.parseFormalParameters()
         if len(formalParameters.params) != 1:
             self.tolerateError(Messages.BadSetterArity)
