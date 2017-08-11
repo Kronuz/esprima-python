@@ -353,11 +353,17 @@ class Parser(object):
             column=self.startMarker.column,
         )
 
-    def startNode(self, token):
+    def startNode(self, token, lastLineStart=0):
+        column = token.start - token.lineStart
+        line = token.lineNumber
+        if column < 0:
+            column += lastLineStart
+            line -= 1
+
         return Marker(
             index=token.start,
-            line=token.lineNumber,
-            column=token.start - token.lineStart,
+            line=line,
+            column=column,
         )
 
     def finalize(self, marker, node):
@@ -1311,12 +1317,16 @@ class Parser(object):
             # Final reduce to clean-up the stack.
             i = len(stack) - 1
             expr = stack[i]
-            markers.pop()
+
+            lastMarker = markers.pop()
             while i > 1:
-                node = self.startNode(markers.pop())
+                marker = markers.pop()
+                lastLineStart = lastMarker.lineStart if lastMarker else 0
+                node = self.startNode(marker, lastLineStart)
                 operator = stack[i - 1]
                 expr = self.finalize(node, Node.BinaryExpression(operator, stack[i - 2], expr))
                 i -= 2
+                lastMarker = marker
 
         return expr
 
