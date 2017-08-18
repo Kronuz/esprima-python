@@ -1012,32 +1012,24 @@ class Scanner(object):
         # scenarios. For example, `[\u{1044f}-\u{10440}]` is an invalid
         # pattern that would not be detected by this substitution.
         astralSubstitute = '\uFFFF'
-        tmp = pattern
 
-        if 'u' in flags:
-            # Replace every Unicode escape sequence with the equivalent
-            # BMP character or a constant ASCII code point in the case of
-            # astral symbols. (See the above note on `astralSubstitute`
-            # for more information.)
-            def astralSub(m):
-                codePoint = int(m.group(1) or m.group(2), 16)
-                if codePoint > 0x10FFFF:
-                    self.throwUnexpectedToken(Messages.InvalidRegExp)
-                if codePoint <= 0xFFFF:
-                    return uchr(codePoint)
-                return astralSubstitute
-            tmp = re.sub(r'\\u\{([0-9a-fA-F]+)\}|\\u([a-fA-F0-9]{4})', astralSub, tmp)
+        # Replace every Unicode escape sequence with the equivalent
+        # BMP character or a constant ASCII code point in the case of
+        # astral symbols. (See the above note on `astralSubstitute`
+        # for more information.)
+        def astralSub(m):
+            codePoint = int(m.group(1) or m.group(2), 16)
+            if codePoint > 0x10FFFF:
+                self.tolerateUnexpectedToken(Messages.InvalidRegExp)
+            elif codePoint <= 0xFFFF:
+                return uchr(codePoint)
+            return astralSubstitute
+        pattern = re.sub(r'\\u\{([0-9a-fA-F]+)\}|\\u([a-fA-F0-9]{4})', astralSub, pattern)
 
-            # Replace each paired surrogate with a single ASCII symbol to
-            # avoid throwing on regular expressions that are only valid in
-            # combination with the "u" flag.
-            tmp = re.sub(r'[\uD800-\uDBFF][\uDC00-\uDFFF]', astralSubstitute, tmp)
-
-        # First, detect invalid regular expressions.
-        try:
-            re.compile(tmp)
-        except Exception:
-            self.throwUnexpectedToken(Messages.InvalidRegExp)
+        # Replace each paired surrogate with a single ASCII symbol to
+        # avoid throwing on regular expressions that are only valid in
+        # combination with the "u" flag.
+        pattern = re.sub(r'[\uD800-\uDBFF][\uDC00-\uDFFF]', astralSubstitute, pattern)
 
         # Return a regular expression object for this pattern-flag pair, or
         # `null` in case the current environment doesn't support the flags it
@@ -1046,7 +1038,7 @@ class Scanner(object):
         try:
             return re.compile(pattern, pyflags)
         except Exception:
-            return None
+            self.tolerateUnexpectedToken(Messages.InvalidRegExp)
 
     def scanRegExpBody(self):
         ch = self.source[self.index]
