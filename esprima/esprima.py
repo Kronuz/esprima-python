@@ -53,9 +53,12 @@ def parse(code, options=None, delegate=None, **kwargs):
 
     def proxyDelegate(node, metadata):
         if delegate:
-            delegate(node, metadata)
+            new_node = delegate(node, metadata)
+            if new_node is not None:
+                node = new_node
         if commentHandler:
             commentHandler.visit(node, metadata)
+        return node
 
     parserDelegate = None if delegate is None else proxyDelegate
     collectComment = options.get('comment', False)
