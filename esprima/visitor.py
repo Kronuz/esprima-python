@@ -51,7 +51,7 @@ class NodeVisitor(object):
             method = 'transform_' + node.__class__.__name__
             transformer = getattr(self, method, self.generic_transform)
             new_node = transformer(node, metadata)
-            if new_node is not None:
+            if new_node is not None and node is not new_node:
                 node = new_node
         return node
 
@@ -65,7 +65,7 @@ class NodeVisitor(object):
             method = 'visit_' + node.__class__.__name__
             visitor = getattr(self, method, self.generic_visit)
             new_node = visitor(node)
-            if new_node is not None:
+            if new_node is not None and node is not new_node:
                 node = new_node
         return node
 
