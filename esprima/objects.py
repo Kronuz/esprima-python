@@ -77,6 +77,10 @@ def toDict(value):
     return obj
 
 
+class Array(list):
+    pass
+
+
 class Object(object):
     def toDict(self):
         return toDict(self.__dict__)

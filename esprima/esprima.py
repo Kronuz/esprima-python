@@ -27,7 +27,7 @@ from .comment_handler import CommentHandler
 from .error_handler import Error
 from .jsx_parser import JSXParser
 from .jsx_syntax import JSXSyntax
-from .objects import toDict
+from .objects import Array, toDict
 from .parser import Parser
 from .syntax import Syntax
 from .tokenizer import Tokenizer
@@ -106,10 +106,7 @@ def tokenize(code, options=None, delegate=None, **kwargs):
 
     tokenizer = Tokenizer(code, options)
 
-    class Tokens(list):
-        pass
-
-    tokens = Tokens()
+    tokens = Array()
 
     try:
         while True:
