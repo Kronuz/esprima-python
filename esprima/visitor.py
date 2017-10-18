@@ -23,63 +23,260 @@
 
 from __future__ import unicode_literals
 
-from .nodes import Node
+import json
+import types
+from collections import deque
+
+from .objects import Object
+from .compat import PY3, unicode
 
 
-class NodeVisitor(object):
+class VisitRecursionError(Exception):
+    pass
+
+
+class Visited(object):
+    def __init__(self, result):
+        if isinstance(result, Visited):
+            result = result.result
+        self.result = result
+
+
+class Visitor(object):
     """
-    A node visitor base class that walks the abstract syntax tree and calls a
-    visitor function for every node found.  This function may return a value
+    An Object visitor base class that walks the abstract syntax tree and calls a
+    visitor function for every Object found.  This function may return a value
     which is forwarded by the `visit` method.
 
     This class is meant to be subclassed, with the subclass adding visitor
     methods.
 
     Per default the visitor functions for the nodes are ``'visit_'`` +
-    class name of the node.  So a `Module` node visit function would
+    class name of the Object.  So a `Module` Object visit function would
     be `visit_Module`.  This behavior can be changed by overriding
-    the `visit` method.  If no visitor function exists for a node
+    the `visit` method.  If no visitor function exists for a Object
     (return value `None`) the `generic_visit` visitor is used instead.
     """
 
-    def __call__(self, node, metadata):
-        return self.transform(node, metadata)
+    def __call__(self, obj, metadata):
+        return self.transform(obj, metadata)
 
-    def transform(self, node, metadata):
-        """Transform a node."""
-        if isinstance(node, Node):
-            method = 'transform_' + node.__class__.__name__
-            transformer = getattr(self, method, self.generic_transform)
-            new_node = transformer(node, metadata)
-            if new_node is not None and node is not new_node:
-                node = new_node
-        return node
+    def transform(self, obj, metadata):
+        """Transform an Object."""
+        if isinstance(obj, Object):
+            method = 'transform_' + obj.__class__.__name__
+            transformer = getattr(self, method, self.transform_Object)
+            new_obj = transformer(obj, metadata)
+            if new_obj is not None and obj is not new_obj:
+                obj = new_obj
+        return obj
 
-    def generic_transform(self, node, metadata):
-        """Called if no explicit transform function exists for a node."""
-        return node
+    def transform_Object(self, obj, metadata):
+        """Called if no explicit transform function exists for an Object."""
+        return obj
 
-    def visit(self, node):
-        """Visit a node."""
-        if isinstance(node, Node):
-            method = 'visit_' + node.__class__.__name__
-            visitor = getattr(self, method, self.generic_visit)
-            new_node = visitor(node)
-            if new_node is not None and node is not new_node:
-                node = new_node
-        return node
+    def generic_visit(self, obj):
+        return self.visit(self.visit_Object(obj))
 
-    def generic_visit(self, node):
-        """Called if no explicit visitor function exists for a node."""
-        for field, value in list(node.__dict__.items()):
+    def visit(self, obj):
+        """Visit a Object."""
+        if not hasattr(self, 'visitors'):
+            self._visit_context = {}
+            self._visit_count = 0
+        try:
+            self._visit_count += 1
+            stack = deque()
+            stack.append((obj, None))
+            last_result = None
+            while stack:
+                try:
+                    last, visited = stack[-1]
+                    if isinstance(last, types.GeneratorType):
+                        stack.append((last.send(last_result), None))
+                        last_result = None
+                    elif isinstance(last, Visited):
+                        stack.pop()
+                        last_result = last.result
+                    elif isinstance(last, Object):
+                        if last in self._visit_context:
+                            if self._visit_context[last] == self.visit_Object:
+                                visitor = self.visit_RecursionError
+                            else:
+                                visitor = self.visit_Object
+                        else:
+                            method = 'visit_' + last.__class__.__name__
+                            visitor = getattr(self, method, self.visit_Object)
+                        self._visit_context[last] = visitor
+                        stack.pop()
+                        stack.append((visitor(last), last))
+                    else:
+                        method = 'visit_' + last.__class__.__name__
+                        visitor = getattr(self, method, self.visit_Generic)
+                        stack.pop()
+                        stack.append((visitor(last), None))
+                except StopIteration:
+                    stack.pop()
+                    if visited and visited in self._visit_context:
+                        del self._visit_context[visited]
+            return last_result
+        finally:
+            self._visit_count -= 1
+            if self._visit_count <= 0:
+                self._visit_context = {}
+
+    def visit_RecursionError(self, obj):
+        raise VisitRecursionError
+
+    def visit_Object(self, obj):
+        """Called if no explicit visitor function exists for an Object."""
+        yield obj.__dict__
+        yield Visited(obj)
+
+    def visit_Generic(self, obj):
+        """Called if no explicit visitor function exists for an object."""
+        yield Visited(obj)
+
+    def visit_list(self, obj):
+        for item in obj:
+            yield item
+        yield Visited(obj)
+
+    visit_Array = visit_list
+
+    def visit_dict(self, obj):
+        for field, value in list(obj.items()):
             if not field.startswith('_'):
-                if isinstance(value, list):
-                    for i, item in enumerate(value):
-                        new_item = self.visit(item)
-                        if new_item is not None and item is not new_item:
-                            value[i] = new_item
-                else:
-                    new_value = self.visit(value)
-                    if new_value is not None and value is not new_value:
-                        node.__dict__[field] = new_value
-        return node
+                yield value
+        yield Visited(obj)
+
+
+class NodeVisitor(Visitor):
+    pass
+
+
+class ReprVisitor(Visitor):
+    def visit(self, obj, indent=4, nl=b"\n", sp=b"", skip=()):
+        self.level = 0
+        if isinstance(indent, int):
+            indent = b" " * indent
+        self.indent = indent
+        self.nl = nl
+        self.sp = sp
+        self.skip = skip
+        return super(ReprVisitor, self).visit(obj)
+
+    def visit_RecursionError(self, obj):
+        yield Visited(b"...")
+
+    def visit_Object(self, obj):
+        value_repr = yield obj.__dict__
+        yield Visited(value_repr)
+
+    def visit_Generic(self, obj):
+        yield Visited(repr(obj))
+
+    def visit_list(self, obj):
+        indent1 = self.indent * self.level
+        indent2 = indent1 + self.indent
+        self.level += 1
+        try:
+            items = []
+            for item in obj:
+                v = yield item
+                items.append(v)
+            if items:
+                value_repr = b"[%s%s%s%s%s%s%s]" % (
+                    self.sp,
+                    self.nl,
+                    indent2,
+                    (b",%s%s%s" % (self.nl, self.sp, indent2)).join(items),
+                    self.nl,
+                    indent1,
+                    self.sp,
+                )
+            else:
+                value_repr = b"[]"
+        finally:
+            self.level -= 1
+
+        yield Visited(value_repr)
+
+    visit_Array = visit_list
+
+    def visit_dict(self, obj):
+        indent1 = self.indent * self.level
+        indent2 = indent1 + self.indent
+        self.level += 1
+        try:
+            items = []
+            for k, item in obj.items():
+                if item is not None and not k.startswith('_') and k not in self.skip:
+                    v = yield item
+                    items.append(b"%s: %s" % (k, v))
+            if items:
+                value_repr = b"{%s%s%s%s%s%s%s}" % (
+                    self.sp,
+                    self.nl,
+                    indent2,
+                    (b",%s%s%s" % (self.nl, self.sp, indent2)).join(items),
+                    self.nl,
+                    indent1,
+                    self.sp,
+                )
+            else:
+                value_repr = b"{}"
+        finally:
+            self.level -= 1
+
+        yield Visited(value_repr)
+
+    if PY3:
+        def visit_str(self, obj):
+            value_repr = json.dumps(obj)
+            yield Visited(value_repr)
+    else:
+        def visit_unicode(self, obj):
+            value_repr = json.dumps(obj)
+            yield Visited(value_repr)
+
+    def visit_SourceLocation(self, obj):
+        old_indent, self.indent = self.indent, ""
+        old_nl, self.nl = self.nl, ""
+        old_sp, self.sp = self.sp, ""
+        try:
+            yield obj
+        finally:
+            self.indent = old_indent
+            self.nl = old_nl
+            self.sp = old_sp
+
+
+class ToDictVisitor(Visitor):
+    def visit_RecursionError(self, obj):
+        yield Visited({
+            b'error': "Infinite recursion detected...",
+        })
+
+    def visit_Object(self, obj):
+        obj = yield obj.__dict__
+        yield Visited(obj)
+
+    def visit_list(self, obj):
+        items = []
+        for item in obj:
+            v = yield item
+            items.append(v)
+        yield Visited(items)
+
+    visit_Array = visit_list
+
+    def visit_dict(self, obj):
+        items = []
+        for k, item in obj.items():
+            if item is not None and not k.startswith('_'):
+                v = yield item
+                items.append((unicode(k), v))
+        yield Visited(dict(items))
+
+    def visit_SRE_Pattern(self, obj):
+        yield Visited({})
