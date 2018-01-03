@@ -155,10 +155,10 @@ class NodeVisitor(Visitor):
 
 
 class ReprVisitor(Visitor):
-    def visit(self, obj, indent=4, nl=b"\n", sp=b"", skip=()):
+    def visit(self, obj, indent=4, nl="\n", sp="", skip=()):
         self.level = 0
         if isinstance(indent, int):
-            indent = b" " * indent
+            indent = " " * indent
         self.indent = indent
         self.nl = nl
         self.sp = sp
@@ -166,7 +166,7 @@ class ReprVisitor(Visitor):
         return super(ReprVisitor, self).visit(obj)
 
     def visit_RecursionError(self, obj):
-        yield Visited(b"...")
+        yield Visited("...")
 
     def visit_Object(self, obj):
         value_repr = yield obj.__dict__
@@ -185,17 +185,17 @@ class ReprVisitor(Visitor):
                 v = yield item
                 items.append(v)
             if items:
-                value_repr = b"[%s%s%s%s%s%s%s]" % (
+                value_repr = "[%s%s%s%s%s%s%s]" % (
                     self.sp,
                     self.nl,
                     indent2,
-                    (b",%s%s%s" % (self.nl, self.sp, indent2)).join(items),
+                    (",%s%s%s" % (self.nl, self.sp, indent2)).join(items),
                     self.nl,
                     indent1,
                     self.sp,
                 )
             else:
-                value_repr = b"[]"
+                value_repr = "[]"
         finally:
             self.level -= 1
 
@@ -212,19 +212,19 @@ class ReprVisitor(Visitor):
             for k, item in obj.items():
                 if item is not None and not k.startswith('_') and k not in self.skip:
                     v = yield item
-                    items.append(b"%s: %s" % (k, v))
+                    items.append("%s: %s" % (k, v))
             if items:
-                value_repr = b"{%s%s%s%s%s%s%s}" % (
+                value_repr = "{%s%s%s%s%s%s%s}" % (
                     self.sp,
                     self.nl,
                     indent2,
-                    (b",%s%s%s" % (self.nl, self.sp, indent2)).join(items),
+                    (",%s%s%s" % (self.nl, self.sp, indent2)).join(items),
                     self.nl,
                     indent1,
                     self.sp,
                 )
             else:
-                value_repr = b"{}"
+                value_repr = "{}"
         finally:
             self.level -= 1
 
@@ -254,7 +254,7 @@ class ReprVisitor(Visitor):
 class ToDictVisitor(Visitor):
     def visit_RecursionError(self, obj):
         yield Visited({
-            b'error': "Infinite recursion detected...",
+            'error': "Infinite recursion detected...",
         })
 
     def visit_Object(self, obj):
