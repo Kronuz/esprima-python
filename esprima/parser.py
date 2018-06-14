@@ -2084,8 +2084,10 @@ class Parser(object):
         self.expectKeyword('return')
 
         hasArgument = (
-            not self.match(';') and not self.match('}') and
-            not self.hasLineTerminator and self.lookahead.type is not Token.EOF
+            (
+                not self.match(';') and not self.match('}') and
+                not self.hasLineTerminator and self.lookahead.type is not Token.EOF
+            ) or self.lookahead.type is Token.Template
         )
         argument = self.parseExpression() if hasArgument else None
         self.consumeSemicolon()
