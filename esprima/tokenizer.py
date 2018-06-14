@@ -80,7 +80,7 @@ class Reader(object):
         elif previous == '}':
             # Dividing a function by anything makes little sense,
             # but we have to check for that.
-            regex = False
+            regex = True
             if len(self.values) >= 3 and self.values[self.curly - 3] == 'function':
                 # Anonymous function, e.g. function(){} /42
                 check = self.values[self.curly - 4]
@@ -157,8 +157,17 @@ class Tokenizer(object):
                         end=Position(),
                     )
 
-                startRegex = self.scanner.source[self.scanner.index] == '/' and self.reader.isRegexStart()
-                token = self.scanner.scanRegExp() if startRegex else self.scanner.lex()
+                maybeRegex = self.scanner.source[self.scanner.index] == '/' and self.reader.isRegexStart()
+                if maybeRegex:
+                    state = self.scanner.saveState()
+                    try:
+                        token = self.scanner.scanRegExp()
+                    except Exception:
+                        self.scanner.restoreState(state)
+                        token = self.scanner.lex()
+                else:
+                    token = self.scanner.lex()
+
                 self.reader.append(token)
 
                 entry = BufferEntry(

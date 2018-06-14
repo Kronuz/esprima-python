@@ -38,7 +38,6 @@ SOURCE_RE = re.compile(br'''^var\s+source\s*=\s*(['"])(.*)\1;\s*$''', re.DOTALL)
 
 EXPECTED_FAULRES = (
     ('TestExpression', u'u_flag_surrogate_pair'),  # Regex comes with no value
-    ('TestTokenize', u'migrated_0005'),  # Doesn't add Punctuator and Nueric?
 )
 
 
