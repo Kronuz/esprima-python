@@ -103,6 +103,7 @@ class Scanner(object):
         self.source = unicode(code) + '\x00'
         self.errorHandler = handler
         self.trackComment = False
+        self.isModule = False
 
         self.length = len(code)
         self.index = 0
@@ -297,7 +298,7 @@ class Scanner(object):
                 else:
                     break
 
-            elif ch == '<':  # U+003C is '<'
+            elif ch == '<' and not self.isModule:  # U+003C is '<'
                 if self.source[self.index + 1:self.index + 4] == '!--':
                     self.index += 4  # `<!--`
                     comment = self.skipSingleLineComment(4)
