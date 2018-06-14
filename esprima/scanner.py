@@ -823,11 +823,11 @@ class Scanner(object):
                             self.index += 1
                             str += self.scanUnicodeCodePointEscape()
                         else:
-                            unescaped = self.scanHexEscape(ch)
-                            if not unescaped:
+                            unescapedChar = self.scanHexEscape(ch)
+                            if not unescapedChar:
                                 self.throwUnexpectedToken()
 
-                            str += unescaped
+                            str += unescapedChar
 
                     elif ch == 'x':
                         unescaped = self.scanHexEscape(ch)
@@ -934,9 +934,9 @@ class Scanner(object):
                             cooked += self.scanUnicodeCodePointEscape()
                         else:
                             restore = self.index
-                            unescaped = self.scanHexEscape(ch)
-                            if unescaped:
-                                cooked += unescaped
+                            unescapedChar = self.scanHexEscape(ch)
+                            if unescapedChar:
+                                cooked += unescapedChar
                             else:
                                 self.index = restore
                                 cooked += ch

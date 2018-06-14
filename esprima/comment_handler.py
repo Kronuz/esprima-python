@@ -82,12 +82,12 @@ class CommentHandler(object):
                 self.trailing = []
             return trailingComments
 
-        entry = self.stack and self.stack[-1]
-        if entry and entry.node.trailingComments:
-            firstComment = entry.node.trailingComments[0]
+        last = self.stack and self.stack[-1]
+        if last and last.node.trailingComments:
+            firstComment = last.node.trailingComments[0]
             if firstComment and firstComment.range[0] >= metadata.end.offset:
-                trailingComments = entry.node.trailingComments
-                del entry.node.trailingComments
+                trailingComments = last.node.trailingComments
+                del last.node.trailingComments
         return trailingComments
 
     def findLeadingComments(self, metadata):

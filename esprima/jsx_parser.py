@@ -457,9 +457,9 @@ class JSXParser(Parser):
         self.expectJSX('<')
         if self.matchJSX('/'):
             self.expectJSX('/')
-            name = self.parseJSXElementName()
+            elementName = self.parseJSXElementName()
             self.expectJSX('>')
-            return self.finalize(node, JSXNode.JSXClosingElement(name))
+            return self.finalize(node, JSXNode.JSXClosingElement(elementName))
 
         name = self.parseJSXElementName()
         attributes = self.parseJSXAttributes()
