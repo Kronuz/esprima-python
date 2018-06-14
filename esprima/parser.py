@@ -2087,7 +2087,9 @@ class Parser(object):
             (
                 not self.match(';') and not self.match('}') and
                 not self.hasLineTerminator and self.lookahead.type is not Token.EOF
-            ) or self.lookahead.type is Token.Template
+            ) or
+            self.lookahead.type is Token.StringLiteral or
+            self.lookahead.type is Token.Template
         )
         argument = self.parseExpression() if hasArgument else None
         self.consumeSemicolon()
