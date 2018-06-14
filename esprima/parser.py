@@ -754,7 +754,7 @@ class Parser(object):
             id = token.value
             self.nextToken()
             computed = self.match('[')
-            isAsync = not self.hasLineTerminator and (id == 'async') and not (self.match(':', '(', '*'))
+            isAsync = not self.hasLineTerminator and (id == 'async') and not (self.match(':', '(', '*', ','))
             key = self.parseObjectPropertyKey() if isAsync else self.finalize(node, Node.Identifier(id))
         elif self.match('*'):
             self.nextToken()
