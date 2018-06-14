@@ -1,4 +1,4 @@
-|PyPI version| |PyPI downloads|
+|PyPI Version| |PyPI License| |PyPI Format| |PyPI Status|
 
 **Esprima** (`esprima.org <http://esprima.org>`__, BSD license) is a
 high performance, standard-compliant
@@ -97,7 +97,19 @@ A simple example:
 For more information, please read the `complete
 documentation <http://esprima.org/doc>`__.
 
-.. |PyPI version| image:: https://img.shields.io/pypi/v/esprima.svg
+.. |PyPI Version| image:: https://img.shields.io/pypi/v/esprima.svg
    :target: https://pypi.python.org/pypi/esprima
-.. |PyPI downloads| image:: https://img.shields.io/pypi/dm/esprima.svg
+.. |PyPI License| image:: https://img.shields.io/pypi/l/esprima.svg
+   :target: https://pypi.python.org/pypi/esprima
+.. |PyPI Wheel| image:: https://img.shields.io/pypi/wheel/esprima.svg
+   :target: https://pypi.python.org/pypi/esprima
+.. |PyPI Format| image:: https://img.shields.io/pypi/format/esprima.svg
+   :target: https://pypi.python.org/pypi/esprima
+.. |PyPI Python Version| image:: https://img.shields.io/pypi/pyversions/esprima.svg
+   :target: https://pypi.python.org/pypi/esprima
+.. |PyPI Implementation| image:: https://img.shields.io/pypi/implementation/esprima.svg
+   :target: https://pypi.python.org/pypi/esprima
+.. |PyPI Status| image:: https://img.shields.io/pypi/status/esprima.svg
+   :target: https://pypi.python.org/pypi/esprima
+.. |PyPI Downloads| image:: https://img.shields.io/pypi/dm/esprima.svg
    :target: https://pypi.python.org/pypi/esprima

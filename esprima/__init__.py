@@ -23,7 +23,7 @@
 
 from __future__ import absolute_import
 
-version = '4.0.0-dev.12'
+version = '4.0.0'
 __version__ = (4, 0, 0)
 
 from .esprima import *  # NOQA
