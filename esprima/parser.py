@@ -2740,11 +2740,8 @@ class Parser(object):
                     isAsync = True
                     token = self.lookahead
                     key = self.parseObjectPropertyKey()
-                    if token.type is Token.Identifier:
-                        if token.value == 'get' or token.value == 'set':
-                            self.tolerateUnexpectedToken(token)
-                        elif token.value == 'constructor':
-                            self.tolerateUnexpectedToken(token, Messages.ConstructorIsAsync)
+                    if token.type is Token.Identifier and token.value == 'constructor':
+                        self.tolerateUnexpectedToken(token, Messages.ConstructorIsAsync)
 
         lookaheadPropertyKey = self.qualifiedPropertyName(self.lookahead)
         if token.type is Token.Identifier:
