@@ -1,4 +1,4 @@
-|PyPI Version| |PyPI License| |PyPI Format| |PyPI Status|
+|Donate| |PyPI Version| |PyPI License| |PyPI Format| |PyPI Status|
 
 **Esprima** (`esprima.org <http://esprima.org>`__, BSD license) is a
 high performance, standard-compliant
@@ -97,6 +97,8 @@ A simple example:
 For more information, please read the `complete
 documentation <http://esprima.org/doc>`__.
 
+.. |Donate| image:: https://img.shields.io/badge/Donate-PayPal-green.svg
+   :target: https://www.paypal.me/Kronuz/25
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/esprima.svg
    :target: https://pypi.python.org/pypi/esprima
 .. |PyPI License| image:: https://img.shields.io/pypi/l/esprima.svg
