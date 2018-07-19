@@ -64,9 +64,9 @@ class Config(Object):
 
 
 class Context(object):
-    def __init__(self, isModule=False, await=False, allowIn=True, allowStrictDirective=True, allowYield=True, firstCoverInitializedNameError=None, isAssignmentTarget=False, isBindingElement=False, inFunctionBody=False, inIteration=False, inSwitch=False, labelSet=None, strict=False):
+    def __init__(self, isModule=False, await_=False, allowIn=True, allowStrictDirective=True, allowYield=True, firstCoverInitializedNameError=None, isAssignmentTarget=False, isBindingElement=False, inFunctionBody=False, inIteration=False, inSwitch=False, labelSet=None, strict=False):
         self.isModule = isModule
-        self.await = await
+        self.await_ = await_
         self.allowIn = allowIn
         self.allowStrictDirective = allowStrictDirective
         self.allowYield = allowYield
@@ -145,7 +145,7 @@ class Parser(object):
 
         self.context = Context(
             isModule=False,
-            await=False,
+            await_=False,
             allowIn=True,
             allowStrictDirective=True,
             allowYield=True,
@@ -544,7 +544,7 @@ class Parser(object):
 
         typ = self.lookahead.type
         if typ is Token.Identifier:
-            if (self.context.isModule or self.context.await) and self.lookahead.value == 'await':
+            if (self.context.isModule or self.context.await_) and self.lookahead.value == 'await':
                 self.tolerateUnexpectedToken(self.lookahead)
             expr = self.parseFunctionExpression() if self.matchAsyncFunction() else self.finalize(node, Node.Identifier(self.nextToken().value))
 
@@ -688,13 +688,13 @@ class Parser(object):
         node = self.createNode()
 
         previousAllowYield = self.context.allowYield
-        previousAwait = self.context.await
+        previousAwait = self.context.await_
         self.context.allowYield = False
-        self.context.await = True
+        self.context.await_ = True
         params = self.parseFormalParameters()
         method = self.parsePropertyMethod(params)
         self.context.allowYield = previousAllowYield
-        self.context.await = previousAwait
+        self.context.await_ = previousAwait
 
         return self.finalize(node, Node.AsyncFunctionExpression(None, params.params, method))
 
@@ -1234,7 +1234,7 @@ class Parser(object):
                 self.tolerateError(Messages.StrictDelete)
             self.context.isAssignmentTarget = False
             self.context.isBindingElement = False
-        elif self.context.await and self.matchContextualKeyword('await'):
+        elif self.context.await_ and self.matchContextualKeyword('await'):
             expr = self.parseAwaitExpression()
         else:
             expr = self.parseUpdateExpression()
@@ -1382,7 +1382,7 @@ class Parser(object):
             pass
         elif typ is Syntax.ArrowParameterPlaceHolder:
             params = expr.params
-            asyncArrow = expr.async
+            asyncArrow = expr.async_
         else:
             return None
 
@@ -1440,7 +1440,7 @@ class Parser(object):
                 # https://tc39.github.io/ecma262/#sec-arrow-function-definitions
                 self.context.isAssignmentTarget = False
                 self.context.isBindingElement = False
-                isAsync = expr.async
+                isAsync = expr.async_
                 list = self.reinterpretAsCoverFormalsList(expr)
 
                 if list:
@@ -1453,9 +1453,9 @@ class Parser(object):
                     self.context.allowStrictDirective = list.simple
 
                     previousAllowYield = self.context.allowYield
-                    previousAwait = self.context.await
+                    previousAwait = self.context.await_
                     self.context.allowYield = True
-                    self.context.await = isAsync
+                    self.context.await_ = isAsync
 
                     node = self.startNode(startToken)
                     self.expect('=>')
@@ -1480,7 +1480,7 @@ class Parser(object):
                     self.context.strict = previousStrict
                     self.context.allowStrictDirective = previousAllowStrictDirective
                     self.context.allowYield = previousAllowYield
-                    self.context.await = previousAwait
+                    self.context.await_ = previousAwait
             else:
                 if self.matchAssign():
                     if not self.context.isAssignmentTarget:
@@ -1762,7 +1762,7 @@ class Parser(object):
             else:
                 if self.context.strict or token.value != 'let' or kind != 'var':
                     self.throwUnexpectedToken(token)
-        elif (self.context.isModule or self.context.await) and token.type is Token.Identifier and token.value == 'await':
+        elif (self.context.isModule or self.context.await_) and token.type is Token.Identifier and token.value == 'await':
             self.tolerateUnexpectedToken(token)
 
         return self.finalize(node, Node.Identifier(token.value))
@@ -2481,9 +2481,9 @@ class Parser(object):
                     firstRestricted = token
                     message = Messages.StrictReservedWord
 
-        previousAllowAwait = self.context.await
+        previousAllowAwait = self.context.await_
         previousAllowYield = self.context.allowYield
-        self.context.await = isAsync
+        self.context.await_ = isAsync
         self.context.allowYield = not isGenerator
 
         formalParameters = self.parseFormalParameters(firstRestricted)
@@ -2504,7 +2504,7 @@ class Parser(object):
 
         self.context.strict = previousStrict
         self.context.allowStrictDirective = previousAllowStrictDirective
-        self.context.await = previousAllowAwait
+        self.context.await_ = previousAllowAwait
         self.context.allowYield = previousAllowYield
 
         if isAsync:
@@ -2528,9 +2528,9 @@ class Parser(object):
         id = None
         firstRestricted = None
 
-        previousAllowAwait = self.context.await
+        previousAllowAwait = self.context.await_
         previousAllowYield = self.context.allowYield
-        self.context.await = isAsync
+        self.context.await_ = isAsync
         self.context.allowYield = not isGenerator
 
         if not self.match('('):
@@ -2564,7 +2564,7 @@ class Parser(object):
             self.tolerateUnexpectedToken(stricted, message)
         self.context.strict = previousStrict
         self.context.allowStrictDirective = previousAllowStrictDirective
-        self.context.await = previousAllowAwait
+        self.context.await_ = previousAllowAwait
         self.context.allowYield = previousAllowYield
 
         if isAsync:
