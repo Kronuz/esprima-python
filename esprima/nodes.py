@@ -58,7 +58,7 @@ class ArrowFunctionExpression(Node):
     def __init__(self, params, body, expression):
         self.type = Syntax.ArrowFunctionExpression
         self.generator = False
-        self.async = False
+        self.isAsync = False
         self.params = params
         self.body = body
         self.expression = expression
@@ -83,7 +83,7 @@ class AsyncArrowFunctionExpression(Node):
     def __init__(self, params, body, expression):
         self.type = Syntax.ArrowFunctionExpression
         self.generator = False
-        self.async = True
+        self.isAsync = True
         self.params = params
         self.body = body
         self.expression = expression
@@ -94,7 +94,7 @@ class AsyncFunctionDeclaration(Node):
         self.type = Syntax.FunctionDeclaration
         self.generator = False
         self.expression = False
-        self.async = True
+        self.isAsync = True
         self.id = id
         self.params = params
         self.body = body
@@ -105,7 +105,7 @@ class AsyncFunctionExpression(Node):
         self.type = Syntax.FunctionExpression
         self.generator = False
         self.expression = False
-        self.async = True
+        self.isAsync = True
         self.id = id
         self.params = params
         self.body = body
@@ -288,7 +288,7 @@ class FunctionDeclaration(Node):
     def __init__(self, id, params, body, generator):
         self.type = Syntax.FunctionDeclaration
         self.expression = False
-        self.async = False
+        self.isAsync = False
         self.id = id
         self.params = params
         self.body = body
@@ -299,7 +299,7 @@ class FunctionExpression(Node):
     def __init__(self, id, params, body, generator):
         self.type = Syntax.FunctionExpression
         self.expression = False
-        self.async = False
+        self.isAsync = False
         self.id = id
         self.params = params
         self.body = body
@@ -598,14 +598,14 @@ class ArrowParameterPlaceHolder(Node):
     def __init__(self, params):
         self.type = Syntax.ArrowParameterPlaceHolder
         self.params = params
-        self.async = False
+        self.isAsync = False
 
 
 class AsyncArrowParameterPlaceHolder(Node):
     def __init__(self, params):
         self.type = Syntax.ArrowParameterPlaceHolder
         self.params = params
-        self.async = True
+        self.isAsync = True
 
 
 class BlockComment(Node):
