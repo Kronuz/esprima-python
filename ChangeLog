@@ -1,3 +1,7 @@
+2018-08-24: Version 4.0.1
+
+      * Fix async/await, those are now reserved keywords in Python 3.7
+
 2017-06-10: Version 4.0.0
 
       * Support ES2017 async function and await expression (issue 1079)
