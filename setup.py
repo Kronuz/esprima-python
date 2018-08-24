@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 try:
     from setuptools import setup
 except ImportError:
@@ -10,35 +12,32 @@ from esprima import version
 
 def read(fname):
     try:
-        return open(os.path.join(os.path.dirname(__file__), fname)).read().strip()
+        with open(os.path.join(os.path.dirname(__file__), fname), "r") as fp:
+            return fp.read().strip()
     except IOError:
         return ''
 
 
 setup(
-    name='esprima',
+    name="esprima",
     version=version,
-    author='German M. Bravo (Kronuz)',
-    author_email='german.mb@gmail.com',
-    packages=[
-        'esprima',
-    ],
-    url='https://github.com/Kronuz/esprima-python',
-    license='BSD License',
-    keywords='esprima ecmascript javascript parser ast',
+    author="German M. Bravo (Kronuz)",
+    author_email="german.mb@gmail.com",
+    url="https://github.com/Kronuz/esprima-python",
+    license="BSD License",
+    keywords="esprima ecmascript javascript parser ast",
     description="ECMAScript parsing infrastructure for multipurpose analysis in Python",
-    long_description=read('README'),
+    long_description=read("README.rst"),
+    packages=["esprima"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
         "Topic :: Software Development :: Code Generators",
         "Topic :: Software Development :: Compilers",
-        "Topic :: Text Processing :: General",
         "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Text Processing :: General",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",
