@@ -252,6 +252,11 @@ class ReprVisitor(Visitor):
 
 
 class ToDictVisitor(Visitor):
+    map = {
+        'isAsync': 'async',
+        'allowAwait': 'await',
+    }
+
     def visit_RecursionError(self, obj):
         yield Visited({
             'error': "Infinite recursion detected...",
@@ -275,7 +280,8 @@ class ToDictVisitor(Visitor):
         for k, item in obj.items():
             if item is not None and not k.startswith('_'):
                 v = yield item
-                items.append((unicode(k), v))
+                k = unicode(k)
+                items.append((self.map.get(k, k), v))
         yield Visited(dict(items))
 
     def visit_SRE_Pattern(self, obj):
