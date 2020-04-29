@@ -31,6 +31,7 @@ import fnmatch
 import unittest
 
 from esprima import parse, tokenize, Error, toDict
+from esprima.nodes import Script
 
 BASE_DIR = os.path.dirname(__file__)
 
@@ -187,6 +188,13 @@ class TestEsprima(unittest.TestCase):
         actual = toDict(parse('var $ = "Hello!"'))
 
         self.assertEqual(expected, actual)
+
+    def test_recursion(self):
+        script = ('var testcode = unescape(""+'
+                  + '""+"%u8300"+"%u2f8d"+""+""+"%u8300"+"%u2f8d"+""+""+"%u8300"+"%u2f8d"+""+""+"%u8300"+' * 20
+                  + '"");')
+        r = parse(script)
+        self.assertIsInstance(r, Script)
 
 
 # class TestThirdParty(unittest.TestCase):
