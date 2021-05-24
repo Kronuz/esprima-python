@@ -3,7 +3,6 @@
     "body": [
         {
             "type": "ForOfStatement",
-            "await": false,
             "left": {
                 "type": "Identifier",
                 "name": "x",
