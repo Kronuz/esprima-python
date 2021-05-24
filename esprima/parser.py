@@ -1098,7 +1098,7 @@ class Parser(object):
         hasOptional = False
         while True:
             optional = False
-            if self.match('?/.'):
+            if self.match('?.'):
                 optional = True
                 hasOptional = True
                 self.expect('?.')
@@ -1148,7 +1148,7 @@ class Parser(object):
                 break
 
         self.context.allowIn = previousAllowIn
-        if optional:
+        if hasOptional:
             return Node.ChainExpression(expr)
 
         return expr
