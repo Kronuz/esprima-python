@@ -461,7 +461,7 @@ class Parser(object):
 
     # Cover grammar support.
     #
-    # When an assignment expression position starts with an left parenthesis, the determination of the type
+    # When an assignment expression position starts with a left parenthesis, the determination of the type
     # of the syntax is to be deferred arbitrarily long until the end of the parentheses pair (plus a lookahead)
     # or the first comma. This situation also defers the determination of all the expressions nested in the pair.
     #

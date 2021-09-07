@@ -54,7 +54,7 @@ class Visitor(object):
     Per default the visitor functions for the nodes are ``'visit_'`` +
     class name of the Object.  So a `Module` Object visit function would
     be `visit_Module`.  This behavior can be changed by overriding
-    the `visit` method.  If no visitor function exists for a Object
+    the `visit` method.  If no visitor function exists for an Object
     (return value `None`) the `generic_visit` visitor is used instead.
     """
 
@@ -79,7 +79,7 @@ class Visitor(object):
         return self.visit(self.visit_Object(obj))
 
     def visit(self, obj):
-        """Visit a Object."""
+        """Visit an Object."""
         if not hasattr(self, 'visitors'):
             self._visit_context = {}
             self._visit_count = 0
