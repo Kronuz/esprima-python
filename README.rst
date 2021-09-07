@@ -1,8 +1,8 @@
 |Donate| |PyPI Version| |PyPI License| |PyPI Format| |PyPI Status|
 
-**Esprima** (`esprima.org <http://esprima.org>`__, BSD license) is a
+**Esprima** (`esprima.org <https://esprima.org>`__, BSD license) is a
 high performance, standard-compliant
-`ECMAScript <http://www.ecma-international.org/publications/standards/Ecma-262.htm>`__
+`ECMAScript <https://www.ecma-international.org/publications-and-standards/standards/ecma-262/>`__
 parser officially written in ECMAScript (also popularly known as
 `JavaScript <https://en.wikipedia.org/wiki/JavaScript>`__) and ported to
 Python. Esprima is created and maintained by `Ariya
@@ -17,7 +17,7 @@ Features
 ~~~~~~~~
 
 -  Full support for ECMAScript 2017 (`ECMA-262 8th
-   Edition <http://www.ecma-international.org/publications/standards/Ecma-262.htm>`__)
+   Edition <https://www.ecma-international.org/publications-and-standards/standards/ecma-262/>`__)
 -  Sensible `syntax tree
    format <https://github.com/estree/estree/blob/master/es5.md>`__ as
    standardized by `ESTree project <https://github.com/estree/estree>`__
@@ -25,7 +25,7 @@ Features
    syntax extension for `React <https://facebook.github.io/react/>`__
 -  Optional tracking of syntax node location (index-based and
    line-column)
--  `Heavily tested <http://esprima.org/test/ci.html>`__ (~1500 `unit
+-  `Heavily tested <https://esprima.org/test/ci.html>`__ (~1500 `unit
    tests <https://github.com/jquery/esprima/tree/master/test/fixtures>`__
    with `full code
    coverage <https://codecov.io/github/jquery/esprima>`__)
@@ -95,7 +95,7 @@ A simple example:
     }
 
 For more information, please read the `complete
-documentation <http://esprima.org/doc>`__.
+documentation <https://esprima.org/doc/>`__.
 
 .. |Donate| image:: https://img.shields.io/badge/Donate-PayPal-green.svg
    :target: https://www.paypal.me/Kronuz/25

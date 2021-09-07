@@ -30,7 +30,7 @@ from collections import defaultdict
 
 from .compat import uchr, xrange
 
-# http://stackoverflow.com/questions/14245893/efficiently-list-all-characters-in-a-given-unicode-category
+# https://stackoverflow.com/questions/14245893/efficiently-list-all-characters-in-a-given-unicode-category
 U_CATEGORIES = defaultdict(list)
 for c in map(uchr, xrange(sys.maxunicode + 1)):
     U_CATEGORIES[unicodedata.category(c)].append(c)
