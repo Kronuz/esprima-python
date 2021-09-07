@@ -94,7 +94,7 @@ def main():
 
     print(json.dumps(res, indent=4))
     print()
-    print('Parsed everyting in', round(dt, 5), 'seconds.')
+    print('Parsed everything in', round(dt, 5), 'seconds.')
     print('Thats %d characters per second' % (len(code) // dt))
 
     return 0

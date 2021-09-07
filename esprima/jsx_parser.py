@@ -232,7 +232,7 @@ class JSXParser(Parser):
                 end=self.scanner.index
             )
 
-        # Identifer can not contain backslash (char code 92).
+        # Identifier can not contain backslash (char code 92).
         if Character.isIdentifierStart(ch) and ch != '\\':
             start = self.scanner.index
             self.scanner.index += 1
