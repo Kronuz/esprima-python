@@ -23,8 +23,6 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import sys
-
 import unicodedata
 from collections import defaultdict
 
@@ -32,7 +30,7 @@ from .compat import uchr, xrange
 
 # https://stackoverflow.com/questions/14245893/efficiently-list-all-characters-in-a-given-unicode-category
 U_CATEGORIES = defaultdict(list)
-for c in map(uchr, xrange(sys.maxunicode + 1)):
+for c in map(uchr, xrange(0x10000)):
     U_CATEGORIES[unicodedata.category(c)].append(c)
 UNICODE_LETTER = set(
     U_CATEGORIES['Lu'] + U_CATEGORIES['Ll'] +
@@ -82,6 +80,9 @@ DECIMAL_DIGIT = set(DECIMAL_CONV.keys())
 OCTAL_DIGIT = set(OCTAL_CONV.keys())
 HEX_DIGIT = set(HEX_CONV.keys())
 
+del U_CATEGORIES, UNICODE_LETTER, UNICODE_COMBINING_MARK
+del UNICODE_DIGIT, UNICODE_CONNECTOR_PUNCTUATION
+del DECIMAL_CONV, OCTAL_CONV, HEX_CONV
 
 class Character:
     @staticmethod
