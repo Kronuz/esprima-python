@@ -1095,15 +1095,15 @@ class Parser(object):
         else:
             expr = self.inheritCoverGrammar(self.parseNewExpression if self.matchKeyword('new') else self.parsePrimaryExpression)
 
+        hasOptional = False
         while True:
-            if self.match('.'):
-                self.context.isBindingElement = False
-                self.context.isAssignmentTarget = True
-                self.expect('.')
-                property = self.parseIdentifierName()
-                expr = self.finalize(self.startNode(startToken), Node.StaticMemberExpression(expr, property))
+            optional = False
+            if self.match('?.'):
+                optional = True
+                hasOptional = True
+                self.expect('?.')
 
-            elif self.match('('):
+            if self.match('('):
                 asyncArrow = maybeAsync and (startToken.lineNumber == self.lookahead.lineNumber)
                 self.context.isBindingElement = False
                 self.context.isAssignmentTarget = False
@@ -1113,27 +1113,43 @@ class Parser(object):
                     args = self.parseArguments()
                 if expr.type is Syntax.Import and len(args) != 1:
                     self.tolerateError(Messages.BadImportCallArity)
-                expr = self.finalize(self.startNode(startToken), Node.CallExpression(expr, args))
+                expr = self.finalize(self.startNode(startToken), Node.CallExpression(expr, args, optional))
                 if asyncArrow and self.match('=>'):
                     for arg in args:
                         self.reinterpretExpressionAsPattern(arg)
                     expr = Node.AsyncArrowParameterPlaceHolder(args)
             elif self.match('['):
                 self.context.isBindingElement = False
-                self.context.isAssignmentTarget = True
+                self.context.isAssignmentTarget = not optional
                 self.expect('[')
                 property = self.isolateCoverGrammar(self.parseExpression)
                 self.expect(']')
-                expr = self.finalize(self.startNode(startToken), Node.ComputedMemberExpression(expr, property))
+                expr = self.finalize(self.startNode(startToken), Node.ComputedMemberExpression(expr, property, optional))
 
             elif self.lookahead.type is Token.Template and self.lookahead.head:
+                # Optional template literal is not included in the spec.
+                # https://github.com/tc39/proposal-optional-chaining/issues/54
+                if optional:
+                    self.throwUnexpectedToken(self.lookahead)
+                if hasOptional:
+                    self.throwError(Messages.InvalidTaggedTemplateOnOptionalChain)
                 quasi = self.parseTemplateLiteral()
                 expr = self.finalize(self.startNode(startToken), Node.TaggedTemplateExpression(expr, quasi))
+
+            elif self.match('.') or optional:
+                self.context.isBindingElement = False
+                self.context.isAssignmentTarget = not optional
+                if not optional:
+                    self.expect('.')
+                property = self.parseIdentifierName()
+                expr = self.finalize(self.startNode(startToken), Node.StaticMemberExpression(expr, property, optional))
 
             else:
                 break
 
         self.context.allowIn = previousAllowIn
+        if hasOptional:
+            return Node.ChainExpression(expr)
 
         return expr
 
@@ -1155,29 +1171,46 @@ class Parser(object):
         else:
             expr = self.inheritCoverGrammar(self.parseNewExpression if self.matchKeyword('new') else self.parsePrimaryExpression)
 
+        hasOptional = False
         while True:
+            optional = False
+            if self.match('?.'):
+                optional = True
+                hasOptional = True
+                self.expect('?.')
+
             if self.match('['):
                 self.context.isBindingElement = False
-                self.context.isAssignmentTarget = True
+                self.context.isAssignmentTarget = not optional
                 self.expect('[')
                 property = self.isolateCoverGrammar(self.parseExpression)
                 self.expect(']')
-                expr = self.finalize(node, Node.ComputedMemberExpression(expr, property))
-
-            elif self.match('.'):
-                self.context.isBindingElement = False
-                self.context.isAssignmentTarget = True
-                self.expect('.')
-                property = self.parseIdentifierName()
-                expr = self.finalize(node, Node.StaticMemberExpression(expr, property))
+                expr = self.finalize(node, Node.ComputedMemberExpression(expr, property, optional))
 
             elif self.lookahead.type is Token.Template and self.lookahead.head:
+                # Optional template literal is not included in the spec.
+                # https://github.com/tc39/proposal-optional-chaining/issues/54
+                if optional:
+                    self.throwUnexpectedToken(self.lookahead)
+                if hasOptional:
+                    self.throwError(Messages.InvalidTaggedTemplateOnOptionalChain)
                 quasi = self.parseTemplateLiteral()
                 expr = self.finalize(node, Node.TaggedTemplateExpression(expr, quasi))
+
+            elif self.match('.') or optional:
+                self.context.isBindingElement = False
+                self.context.isAssignmentTarget = not optional
+                if not optional:
+                    self.expect('.')
+                property = self.parseIdentifierName()
+                expr = self.finalize(node, Node.StaticMemberExpression(expr, property, optional))
 
             else:
                 break
 
+        if hasOptional:
+            return Node.ChainExpression(expr)
+        
         return expr
 
     # https://tc39.github.io/ecma262/#sec-update-expressions

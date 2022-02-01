@@ -138,10 +138,11 @@ class BreakStatement(Node):
 
 
 class CallExpression(Node):
-    def __init__(self, callee, args):
+    def __init__(self, callee, args, optional):
         self.type = Syntax.CallExpression
         self.callee = callee
         self.arguments = args
+        self.optional = optional
 
 
 class CatchClause(Node):
@@ -149,6 +150,11 @@ class CatchClause(Node):
         self.type = Syntax.CatchClause
         self.param = param
         self.body = body
+
+class ChainExpression(Node):
+    def __init__(self, expression):
+        self.type = Syntax.ChainExpression
+        self.expression = expression
 
 
 class ClassBody(Node):
@@ -174,11 +180,12 @@ class ClassExpression(Node):
 
 
 class ComputedMemberExpression(Node):
-    def __init__(self, object, property):
+    def __init__(self, object, property, optional):
         self.type = Syntax.MemberExpression
         self.computed = True
         self.object = object
         self.property = property
+        self.optional = optional
 
 
 class ConditionalExpression(Node):
@@ -472,11 +479,12 @@ class SpreadElement(Node):
 
 
 class StaticMemberExpression(Node):
-    def __init__(self, object, property):
+    def __init__(self, object, property, optional):
         self.type = Syntax.MemberExpression
         self.computed = False
         self.object = object
         self.property = property
+        self.optional = optional
 
 
 class Super(Node):

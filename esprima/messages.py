@@ -54,6 +54,7 @@ class Messages:
     InvalidLHSInForLoop = "Invalid left-hand side in for-loop"
     InvalidModuleSpecifier = "Unexpected token"
     InvalidRegExp = "Invalid regular expression"
+    InvalidTaggedTemplateOnOptionalChain = 'Invalid tagged template on optional chain'
     LetInLexicalBinding = "let is disallowed as a lexically bound name"
     MissingFromClause = "Unexpected token"
     MultipleDefaultsInSwitch = "More than one default clause in switch statement"

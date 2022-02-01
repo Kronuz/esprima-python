@@ -563,6 +563,17 @@ class Scanner(object):
             if self.curlyStack:
                 self.curlyStack.pop()
 
+        elif str == '?':
+            self.index += 1
+            if self.source[self.index] == '?':
+                self.index += 1
+                str = '??'
+            if self.source[self.index] == '.' and not self.source[self.index + 1].isdigit():
+                # "?." in "foo?.3:0" should not be treated as optional chaining.
+                # See https://github.com/tc39/proposal-optional-chaining#notes
+                self.index += 1
+                str = '?.'
+
         elif str in (
             ')',
             ';',
@@ -570,7 +581,6 @@ class Scanner(object):
             '[',
             ']',
             ':',
-            '?',
             '~',
         ):
             self.index += 1
