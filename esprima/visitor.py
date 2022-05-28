@@ -282,7 +282,10 @@ class ToDictVisitor(Visitor):
                 v = yield item
                 k = unicode(k)
                 items.append((self.map.get(k, k), v))
-        yield Visited(dict(items))
+        items = dict(items)
+        if "type" in items.keys() and "raw" in items.keys() and items["type"] == 'Literal' and items["raw"] == "null":
+            items["value"] = None
+        yield Visited(items)
 
     def visit_SRE_Pattern(self, obj):
         yield Visited({})
