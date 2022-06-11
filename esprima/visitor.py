@@ -74,6 +74,9 @@ class Visitor(object):
     def transform_Object(self, obj, metadata):
         """Called if no explicit transform function exists for an Object."""
         return obj
+    
+    def generic_transform(self, obj, metadata):
+        return obj
 
     def generic_visit(self, obj):
         return self.visit(self.visit_Object(obj))
