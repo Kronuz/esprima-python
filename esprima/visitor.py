@@ -285,6 +285,8 @@ class ToDictVisitor(Visitor):
         items = dict(items)
         if "type" in items.keys() and "raw" in items.keys() and items["type"] == 'Literal' and items["raw"] == "null":
             items["value"] = None
+        if "type" in items.keys() and "raw" in items.keys() and items["type"] == 'Literal' and "regex" in items.keys() and type(items["value"]) == re.Pattern:
+            items["value"] = None
         yield Visited(items)
 
     def visit_SRE_Pattern(self, obj):
