@@ -27,17 +27,20 @@ import re
 
 from .objects import Object
 from .compat import xrange, unicode, uchr, uord
-from .character import Character, HEX_CONV, OCTAL_CONV
+from .character import Character, HEX_CONV
 from .messages import Messages
 from .token import Token
 
 
-def hexValue(ch):
+def hexDigitValue(ch):
     return HEX_CONV[ch]
 
 
-def octalValue(ch):
-    return OCTAL_CONV[ch]
+_zeroDigitCode = ord("0")
+
+
+def octalDigitValue(ch):
+    return ord(ch) - _zeroDigitCode
 
 
 class RegExp(Object):
@@ -382,7 +385,7 @@ class Scanner(object):
             if not self.eof() and Character.isHexDigit(self.source[self.index]):
                 ch = self.source[self.index]
                 self.index += 1
-                code = code * 16 + hexValue(ch)
+                code = code * 16 + hexDigitValue(ch)
             else:
                 return None
 
@@ -402,7 +405,7 @@ class Scanner(object):
             if not Character.isHexDigit(ch):
                 break
 
-            code = code * 16 + hexValue(ch)
+            code = code * 16 + hexDigitValue(ch)
 
         if code > 0x10FFFF or ch != '}':
             self.throwUnexpectedToken()
@@ -484,17 +487,17 @@ class Scanner(object):
     def octalToDecimal(self, ch):
         # \0 is not octal escape sequence
         octal = ch != '0'
-        code = octalValue(ch)
+        code = octalDigitValue(ch)
 
         if not self.eof() and Character.isOctalDigit(self.source[self.index]):
             octal = True
-            code = code * 8 + octalValue(self.source[self.index])
+            code = code * 8 + octalDigitValue(self.source[self.index])
             self.index += 1
 
             # 3 digits are only allowed when string starts
             # with 0, 1, 2, 3
             if ch in '0123' and not self.eof() and Character.isOctalDigit(self.source[self.index]):
-                code = code * 8 + octalValue(self.source[self.index])
+                code = code * 8 + octalDigitValue(self.source[self.index])
                 self.index += 1
 
         return Octal(octal, code)
