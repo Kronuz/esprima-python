@@ -592,7 +592,7 @@ class Parser(object):
                 self.scanner.index = self.startMarker.index
                 token = self.nextRegexToken()
                 raw = self.getTokenRaw(token)
-                expr = self.finalize(node, Node.RegexLiteral(token.regex, raw, token.pattern, token.flags))
+                expr = self.finalize(node, Node.RegexLiteral("/" + token.pattern + "/" + token.flags, raw, token.pattern, token.flags))
             else:
                 expr = self.throwUnexpectedToken(self.nextToken())
 
