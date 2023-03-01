@@ -71,18 +71,15 @@ WHITE_SPACE = set((
 ))
 LINE_TERMINATOR = set(('\x0A', '\x0D', '\u2028', '\u2029'))
 
-DECIMAL_CONV = dict((c, n) for n, c in enumerate('0123456789'))
-OCTAL_CONV = dict((c, n) for n, c in enumerate('01234567'))
 HEX_CONV = dict((c, n) for n, c in enumerate('0123456789abcdef'))
 for n, c in enumerate('ABCDEF', 10):
     HEX_CONV[c] = n
-DECIMAL_DIGIT = set(DECIMAL_CONV.keys())
-OCTAL_DIGIT = set(OCTAL_CONV.keys())
+OCTAL_DIGIT = set('01234567')
+DECIMAL_DIGIT = OCTAL_DIGIT | {"8", "9"}
 HEX_DIGIT = set(HEX_CONV.keys())
 
 del U_CATEGORIES, UNICODE_LETTER, UNICODE_COMBINING_MARK
 del UNICODE_DIGIT, UNICODE_CONNECTOR_PUNCTUATION
-del DECIMAL_CONV, OCTAL_CONV, HEX_CONV
 
 class Character:
     @staticmethod
